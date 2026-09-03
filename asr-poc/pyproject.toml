@@ -1,0 +1,32 @@
+[project]
+name = "dysarthria-asr-poc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jeonsubb", email = "glvlglvl01@naver.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.14.0",
+    "datasets>=5.0.1",
+    "evaluate>=0.4.6",
+    "fastapi>=0.141.1",
+    "jiwer>=4.0.0",
+    "peft>=0.20.0",
+    "python-multipart>=0.0.32",
+    "silero-vad>=6.2.1",
+    "soundfile>=0.14.0",
+    "tensorboard>=2.21.0",
+    "torch>=2.13.0",
+    "torchaudio>=2.11.0",
+    "transformers>=5.15.0",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[project.scripts]
+dysarthria-asr-poc = "dysarthria_asr_poc:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"

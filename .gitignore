@@ -1,0 +1,44 @@
+# ── 비밀 (절대 커밋 금지) ───────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.mobileprovision
+*.jks
+
+# ── 대용량 자산 (GitHub 부적합) ─────────────────────────
+# 파인튜닝 모델 체크포인트 (수십 GB) — 별도 관리, README에 재현 절차 있음
+asr-poc/checkpoints/
+# AI Hub 학습·평가 데이터 (재배포 제한 + 대용량)
+asr-poc/data/
+# VAD 등 정렬 산출물·로그
+asr-poc/results/*.log
+asr-poc/results/*.json
+
+# ── 의존성·빌드 산출물 ──────────────────────────────────
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+# 네이티브 프로젝트는 prebuild로 재생성 (app.json이 원본)
+oneum/mobile/ios/
+oneum/mobile/android/
+DerivedData/
+DerivedDataSim/
+*.log
+
+# ── OS·에디터 ───────────────────────────────────────────
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ── uv 잠금은 유지, 파이썬 캐시만 제외 ──────────────────
+.pytest_cache/

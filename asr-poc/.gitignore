@@ -1,0 +1,7 @@
+data/raw/
+data/clips*/
+data/*.jsonl
+checkpoints/
+results/
+.venv/
+__pycache__/

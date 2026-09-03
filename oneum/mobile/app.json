@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "온음",
+    "slug": "one",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jeonsubb.oneum",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "말씀하신 음성을 문장으로 바꾸기 위해 마이크를 사용합니다. 확정하신 문장만 소리로 전달됩니다.",
+        "NSSpeechRecognitionUsageDescription": "말씀하신 음성을 문장 후보로 바꾸는 데 사용합니다.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      },
+      "appleTeamId": "3YDAXKB6SA"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#14508C",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "package": "com.jeonsubb.oneum"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-audio"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "84649da2-97b4-475e-8315-d47b5c0bd11f"
+      }
+    },
+    "owner": "jeonsubbs-team"
+  }
+}

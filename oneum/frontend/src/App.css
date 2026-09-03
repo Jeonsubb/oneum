@@ -1,0 +1,56 @@
+/* 접근성 원칙: 큰 버튼, 높은 대비, 한 화면 한 작업 */
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+.logo { font-size: 2.2rem; margin: 0; }
+.hint { font-size: 1.4rem; opacity: 0.85; margin: 0; }
+.notice { font-size: 1.4rem; font-weight: 700; color: #d97706; margin: 0; }
+.error { color: #dc2626; font-size: 1.1rem; }
+.recording-dot::before { content: '● '; color: #dc2626; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+
+button {
+  font-size: 1.3rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 16px;
+  border: 2px solid #64748b;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  min-height: 56px;
+}
+.mic {
+  font-size: 1.8rem;
+  padding: 1.6rem 2.4rem;
+  border: 3px solid #2563eb;
+}
+.mic.stop { border-color: #dc2626; }
+
+.candidates { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 480px; }
+.candidate { font-size: 1.6rem; padding: 1.1rem; }
+.candidate.primary { border: 4px solid #2563eb; font-weight: 700; }
+
+.recovery { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; max-width: 480px; margin-top: 0.5rem; }
+.recovery button { font-size: 1.1rem; min-height: 48px; }
+.direct { display: flex; gap: 0.5rem; }
+.direct input {
+  flex: 1; font-size: 1.2rem; padding: 0.7rem; border-radius: 12px;
+  border: 2px solid #64748b; background: transparent; color: inherit;
+}
+
+.display {
+  font-size: clamp(2.5rem, 9vw, 5rem);
+  font-weight: 800;
+  line-height: 1.3;
+  max-width: 90vw;
+  word-break: keep-all;
+}
+.actions { display: flex; flex-direction: column; gap: 0.8rem; }
+.speak { font-size: 1.6rem; border: 3px solid #16a34a; }
