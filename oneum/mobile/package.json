@@ -7,6 +7,7 @@
     "expo": "~57.0.15",
     "expo-audio": "~57.0.4",
     "expo-file-system": "~57.0.6",
+    "expo-font": "~57.0.3",
     "expo-speech": "~57.0.1",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "puppeteer-core": "^25.10.0",
     "typescript": "~6.0.3"
   },
   "scripts": {

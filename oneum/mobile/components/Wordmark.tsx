@@ -3,7 +3,7 @@
  */
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 
-export function Wordmark({ height = 30, color = '#14508C' }: { height?: number; color?: string }) {
+export function Wordmark({ height = 30, color = '#1D5DEC' }: { height?: number; color?: string }) {
   const w = height * 1.3097
   const s = {
     stroke: color, strokeWidth: 22, fill: 'none',

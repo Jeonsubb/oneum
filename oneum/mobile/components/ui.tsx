@@ -128,14 +128,15 @@ export function AppBar({ title, onBack, right }: { title?: string; onBack?: () =
 
 export function Spacer() { return <View style={{ flex: 1 }} /> }
 
-/** 하단 탭 바 — 최상위 세 화면(말하기·즐겨찾기·연습)을 오간다.
+/** 하단 탭 바 — 최상위 세 화면(말하기·연습·대화)을 오간다.
  *  대화 흐름 중(듣는 중·확인·전달 등)에는 숨겨서 '한 화면 한 작업' 원칙을 지킨다.
  *  아이콘은 항상 한글 라벨과 함께 두고(목업 원칙 4), 터치 타깃을 크게 잡는다. */
-export type TabKey = 'home' | 'practice'
+export type TabKey = 'home' | 'practice' | 'chat'
 
 const TAB_ITEMS: { key: TabKey; label: string; icon: IconName }[] = [
   { key: 'home', label: '말하기', icon: 'mic' },
   { key: 'practice', label: '연습', icon: 'redo' },
+  { key: 'chat', label: '대화', icon: 'chat' },
 ]
 
 export function TabBar({ active, onSelect }: { active: TabKey; onSelect: (k: TabKey) => void }) {
@@ -217,7 +218,8 @@ const st = StyleSheet.create({
 })
 
 export const layout = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' },
+  // 전체 배경은 순백이 아니라 아주 옅은 웜그레이 — 흰 카드·버튼이 배경 위에 살짝 떠 보인다
+  screen: { flex: 1, backgroundColor: C.bg },
   body: { flex: 1, paddingTop: S.bodyPadTop, paddingHorizontal: S.bodyPadX, paddingBottom: S.bodyPadBottom },
   stack: { gap: S.gap },
   hQ: { fontSize: S.hQ, fontWeight: W.extra, lineHeight: S.hQ * 1.4, marginTop: 26, color: C.ink },

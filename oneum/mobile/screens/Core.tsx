@@ -8,6 +8,7 @@
  */
 import { useEffect, useRef } from 'react'
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useAudioRecorderState, type AudioRecorder } from 'expo-audio'
 import { Icon } from '../components/Icon'
 import { Wordmark } from '../components/Wordmark'
 import { AppBar, Btn, C, Candidate, Chip, NoneOfThem, SilenceBadge, Spacer, layout } from '../components/ui'
@@ -75,22 +76,27 @@ export function HomeScreen({
 }
 
 /* ── ② 듣는 중 ───────────────────────────────────────────── */
-export function ListeningScreen({ onStop, onCancel }: { onStop: () => void; onCancel: () => void }) {
+export function ListeningScreen({
+  recorder, onStop, onCancel,
+}: { recorder: AudioRecorder; onStop: () => void; onCancel: () => void }) {
   return (
     <View style={layout.body}>
       <SilenceBadge />
-      <View style={[st.micWrap, { gap: 18 }]}>
+      <View style={[st.micWrap, { gap: 30 }]}>
         <View style={{ alignItems: 'center' }}>
           <Text style={st.listenTitle}>듣고 있어요</Text>
           {/* 카운트다운·제한시간을 두지 않는다. 사용자의 말 속도를 시스템이 기다린다. */}
           <Text style={st.listenSub}>다 말했으면 버튼을 한 번 더 눌러 주세요</Text>
         </View>
-        <Wave />
-        <Pressable onPress={onStop} accessibilityRole="button" accessibilityLabel="말하는 중, 눌러서 끝내기"
-          style={[st.micBtn, st.micListening]}>
-          <Icon name="mic" size={S.micIcon} color={C.onAcc} />
-          <Text style={st.micLabel}>말하는 중</Text>
-        </Pressable>
+        {/* 마이크 뒤 파동이 목소리 크기에 실시간으로 반응한다 — 내 소리가 닿고 있다는 증거 */}
+        <View style={st.rippleWrap}>
+          <VoiceWave recorder={recorder} />
+          <Pressable onPress={onStop} accessibilityRole="button" accessibilityLabel="말하는 중, 눌러서 끝내기"
+            style={st.micBtn}>
+            <Icon name="mic" size={S.micIcon} color={C.onAcc} />
+            <Text style={st.micLabel}>말하는 중</Text>
+          </Pressable>
+        </View>
       </View>
       {/* 유일한 분기는 취소이며 마이크와 멀리 떨어뜨린다 */}
       <Btn label="취소" variant="outline" icon="x" onPress={onCancel} />
@@ -98,25 +104,32 @@ export function ListeningScreen({ onStop, onCancel }: { onStop: () => void; onCa
   )
 }
 
-function Wave() {
-  const bars = useRef([...Array(16)].map(() => new Animated.Value(1))).current
+/** 목소리 크기(데시벨)에 반응하는 파동 — 두 겹의 후광이 레벨에 따라 커졌다 작아진다.
+ *  안쪽은 빠르게(즉각 반응), 바깥쪽은 느리게(잔물결처럼 따라오는 여운) 움직여
+ *  말할 때마다 물결이 일렁이는 느낌을 만든다. 조용하면 잔잔하게 가라앉는다. */
+function VoiceWave({ recorder }: { recorder: AudioRecorder }) {
+  // 80ms 간격으로 녹음 상태(metering dB)를 읽는다. iOS 기준 무음 ≈ -50 이하, 큰 소리 ≈ -5.
+  const state = useAudioRecorderState(recorder, 80)
+  const fast = useRef(new Animated.Value(0)).current
+  const slow = useRef(new Animated.Value(0)).current
+
   useEffect(() => {
-    const anims = bars.map((v, i) =>
-      Animated.loop(Animated.sequence([
-        Animated.timing(v, { toValue: 0.45, duration: 550, delay: i * 55, useNativeDriver: true }),
-        Animated.timing(v, { toValue: 1, duration: 550, useNativeDriver: true }),
-      ])))
-    anims.forEach(a => a.start())
-    return () => anims.forEach(a => a.stop())
-  }, [bars])
-  const heights = [26, 48, 70, 38, 88, 56, 30, 74, 44, 62, 34, 80, 50, 28, 66, 40]
+    const db = state.metering ?? -60
+    const level = Math.min(1, Math.max(0, (db + 50) / 42))   // -50dB→0, -8dB→1
+    Animated.timing(fast, { toValue: level, duration: 90, useNativeDriver: true }).start()
+    Animated.timing(slow, { toValue: level, duration: 420, useNativeDriver: true }).start()
+  }, [state.metering, fast, slow])
+
+  const halo = (v: Animated.Value, maxScale: number, maxOpacity: number) => ({
+    opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.12, maxOpacity] }),
+    transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1.02, maxScale] }) }],
+  })
+
   return (
-    <View style={st.wave} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      {bars.map((v, i) => (
-        <Animated.View key={i}
-          style={[st.waveBar, { height: heights[i], transform: [{ scaleY: v }] }]} />
-      ))}
-    </View>
+    <>
+      <Animated.View pointerEvents="none" style={[st.ring, halo(slow, 1.85, 0.35)]} />
+      <Animated.View pointerEvents="none" style={[st.ring, halo(fast, 1.45, 0.55)]} />
+    </>
   )
 }
 
@@ -295,16 +308,21 @@ const st = StyleSheet.create({
   micWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 26 },
   micBtn: {
     width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
-    backgroundColor: C.accFill, borderWidth: 2, borderColor: C.accEdge,
+    backgroundColor: C.accFill,
     alignItems: 'center', justifyContent: 'center', gap: 10,
+    // 테두리 없이 그림자만으로 라벤더 배경에서 떠 보이게 한다 (참고 시안과 동일)
+    shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 }, elevation: 7,
   },
-  micListening: { borderWidth: 14, borderColor: C.accTint },
   micLabel: { fontSize: S.micLabel, fontWeight: W.extra, color: C.onAcc },
 
   listenTitle: { fontSize: 28, fontWeight: W.extra, color: C.ink },
   listenSub: { fontSize: 18, color: C.sub, marginTop: 8 },
-  wave: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, height: 96 },
-  waveBar: { width: 6, borderRadius: 3, backgroundColor: C.acc },
+  rippleWrap: { alignItems: 'center', justifyContent: 'center' },
+  ring: {
+    position: 'absolute', width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
+    backgroundColor: C.accShadow,
+  },
 
   candSingle: {
     marginTop: 22, borderWidth: 2.5, borderColor: C.acc, borderRadius: 20,

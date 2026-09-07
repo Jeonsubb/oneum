@@ -5,7 +5,7 @@
  *  '실패'로 보이지 않게 하기 위해서다.
  */
 import { useEffect, useRef, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Icon } from '../components/Icon'
 import { AppBar, Btn, C, SilenceBadge, Spacer, layout } from '../components/ui'
 import { S, W } from '../lib/theme'
@@ -70,13 +70,23 @@ export type PracticeSet = {
   draft: boolean
 }
 
+/** AI와의 대화 연습 시나리오. 상대역·상황을 백엔드 프롬프트로 보낸다.
+ *  이 경로에서 만들어지는 AI 문장은 상대에게 전달되지 않는다 — 어디까지나 연습 상대다(DD-02). */
+export type ChatScenario = { name: string; situation: string; scenario: string }
+
 /** 카드에 보이는 유일한 숫자는 '등록 커버리지'다. streak·랭킹·등급은 두지 않는다.
- *  세트 구성은 언어재활사 자문 귀속(BC-08)이며, 자문 전 세트는 "초안"임을 숨기지 않는다. */
+ *  세트 구성은 언어재활사 자문 귀속(BC-08)이며, 자문 전 세트는 "초안"임을 숨기지 않는다.
+ *  상단 전환 바로 상황 연습/읽기 연습 중 하나만 보여준다 — 한 화면에 한 갈래. */
 export function PracticeHomeScreen({
   sets, onStart, onHistory, onManage,
-}: { sets: PracticeSet[]; onStart: (s: PracticeSet) => void; onHistory: () => void; onManage: () => void }) {
-  const situationSets = sets.filter(s => s.kind === 'situation')
-  const readingSets = sets.filter(s => s.kind === 'reading')
+}: {
+  sets: PracticeSet[]
+  onStart: (s: PracticeSet) => void
+  onHistory: () => void
+  onManage: () => void
+}) {
+  const [tab, setTab] = useState<'situation' | 'reading'>('situation')
+  const shown = sets.filter(s => s.kind === tab)
 
   const card = (s: PracticeSet) => (
     <View key={s.name} style={st.setCard}>
@@ -104,19 +114,61 @@ export function PracticeHomeScreen({
   return (
     <View style={layout.body}>
       <AppBar title="연습" />
-      <ScrollView style={{ marginTop: 14 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
-        <Text style={st.sectionHead}>상황 연습</Text>
-        <Text style={st.sectionSub}>실제로 쓰는 짧은 문장을 연습하고, 빠른 발화로 등록합니다.</Text>
-        {situationSets.map(card)}
 
-        <Text style={[st.sectionHead, { marginTop: 20 }]}>읽기 연습</Text>
-        <Text style={st.sectionSub}>시·뉴스 같은 긴 글을 소리 내어 읽으며 발음을 가다듬습니다. 점수도 등급도 없습니다.</Text>
-        {readingSets.map(card)}
+      {/* 상단 전환 바 — 누른 갈래의 세트만 보인다 */}
+      <View style={st.segBar} accessibilityRole="tablist">
+        {([['situation', '상황 연습'], ['reading', '읽기 연습']] as const).map(([k, label]) => {
+          const on = tab === k
+          return (
+            <Pressable key={k} onPress={() => setTab(k)}
+              accessibilityRole="tab" accessibilityState={{ selected: on }}
+              accessibilityLabel={`${label}${on ? ', 선택됨' : ''}`}
+              style={[st.segBtn, on && st.segBtnOn]}>
+              <Text style={[st.segTx, on && st.segTxOn]}>{label}</Text>
+            </Pressable>
+          )
+        })}
+      </View>
+      <Text style={st.sectionSub}>
+        {tab === 'situation'
+          ? '실제로 쓰는 짧은 문장을 연습하고, 빠른 발화로 등록합니다.'
+          : '시·뉴스 같은 긴 글을 소리 내어 읽으며 발음을 가다듬습니다. 점수도 등급도 없습니다.'}
+      </Text>
+
+      <ScrollView style={{ marginTop: 8 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
+        {shown.map(card)}
       </ScrollView>
       <Btn label="내 표현 등록·정리" variant="outline" icon="plus" onPress={onManage}
         style={{ marginTop: 8 }} />
       <Btn label="빠른 발화 기록 보기" variant="outline" icon="redo" onPress={onHistory}
         style={{ marginTop: 10 }} />
+    </View>
+  )
+}
+
+/* ── 대화 탭 홈 — AI 상대 시나리오 목록 ────────────────────── */
+/** 연습 탭에서 분리된 최상위 탭. AI와 실제 상황처럼 주고받는 말하기 연습이다.
+ *  여기서 나눈 말은 밖으로 전달되지 않는다 — AI는 연습 상대일 뿐이다(DD-02). */
+export function ChatHomeScreen({
+  scenarios, onStartChat,
+}: { scenarios: ChatScenario[]; onStartChat: (s: ChatScenario) => void }) {
+  return (
+    <View style={layout.body}>
+      <AppBar title="대화" />
+      <Text style={st.sectionSub}>
+        AI 상대와 실제 상황처럼 주고받으며 말하기를 연습합니다.{'\n'}여기서 나눈 말은 밖으로 전달되지 않아요.
+      </Text>
+      <ScrollView style={{ marginTop: 10 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
+        {scenarios.map(s => (
+          <View key={s.name} style={st.setCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={st.setName}>{s.name}</Text>
+              <Text style={st.setMeta}>{s.situation} · AI와 주고받기</Text>
+            </View>
+            <Btn label="대화" icon="chat" onPress={() => onStartChat(s)} style={{ width: 110, minHeight: 64 }} />
+          </View>
+        ))}
+      </ScrollView>
     </View>
   )
 }
@@ -157,6 +209,69 @@ export function QuickHistoryScreen({
           </View>
         ))}
       </ScrollView>
+    </View>
+  )
+}
+
+/* ── AI 대화 연습 (반실시간 턴 방식) ──────────────────────── */
+/** 사용자가 말함 → 우리 ASR로 전사(사용자 말풍선) → AI 상대역 응답(말풍선 + TTS) → 반복.
+ *  실시간 스트리밍이 아니라 '한 턴씩' 주고받는다. 확정 게이트는 없다 — 상대가 실제 사람이
+ *  아니라 연습 상대이므로, 여기서 나온 말이 남에게 전달되는 일은 없다(DD-02와 정합).
+ *  AI 말풍선을 누르면 다시 읽어 준다(놓쳤을 때). */
+export function AiChatScreen({
+  title, messages, recording, busy, note, onRecord, onReplay, onBack,
+}: {
+  title: string
+  messages: { role: 'user' | 'ai'; text: string }[]
+  recording: boolean
+  busy: boolean
+  note?: string
+  onRecord: () => void
+  onReplay: (text: string) => void
+  onBack: () => void
+}) {
+  const scroller = useRef<ScrollView>(null)
+  return (
+    <View style={[layout.body, { paddingBottom: 0 }]}>
+      <AppBar title={title} onBack={onBack} />
+      <ScrollView
+        ref={scroller}
+        style={{ marginTop: 12 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 16 }}
+        onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
+      >
+        {messages.map((m, i) =>
+          m.role === 'ai' ? (
+            <Pressable key={i} onPress={() => onReplay(m.text)}
+              accessibilityRole="button" accessibilityLabel={`상대: ${m.text}, 눌러서 다시 듣기`}
+              style={[st.bubble, st.bubbleAi]}>
+              <View style={st.bubbleHead}>
+                <Icon name="vol" size={15} color={C.acc} />
+                <Text style={st.bubbleWho}>상대</Text>
+              </View>
+              <Text style={st.bubbleTx}>{m.text}</Text>
+            </Pressable>
+          ) : (
+            <View key={i} style={[st.bubble, st.bubbleMe]}>
+              <Text style={[st.bubbleTx, { color: C.onAcc }]}>{m.text}</Text>
+            </View>
+          ),
+        )}
+        {busy && (
+          <View style={[st.bubble, st.bubbleAi, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+            <ActivityIndicator size="small" color={C.acc} />
+            <Text style={[st.bubbleTx, { color: C.sub }]}>대답을 준비하고 있어요…</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {note ? <Text style={st.chatNote}>{note}</Text> : null}
+      <View style={{ paddingVertical: 12 }}>
+        <Btn
+          label={recording ? '말하는 중… 눌러서 끝내기' : busy ? '잠시만요…' : '눌러서 말하기'}
+          icon="mic" xl onPress={onRecord} disabled={busy}
+        />
+      </View>
     </View>
   )
 }
@@ -350,9 +465,32 @@ const st = StyleSheet.create({
   consentTitle: { fontSize: 18, fontWeight: W.extra, color: C.ink },
   consentDesc: { fontSize: 15, color: C.sub, marginTop: 4, lineHeight: 22 },
 
+  bubble: { maxWidth: '86%', borderRadius: 18, paddingVertical: 12, paddingHorizontal: 16 },
+  bubbleAi: {
+    alignSelf: 'flex-start', backgroundColor: '#fff',
+    borderWidth: 2, borderColor: C.line, borderTopLeftRadius: 6,
+  },
+  bubbleMe: {
+    alignSelf: 'flex-end', backgroundColor: C.accFill,
+    borderWidth: 2, borderColor: C.accEdge, borderTopRightRadius: 6,
+  },
+  bubbleHead: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
+  bubbleWho: { fontSize: 13, fontWeight: W.extra, color: C.acc },
+  bubbleTx: { fontSize: 21, fontWeight: W.bold, lineHeight: 30, color: C.ink },
+  chatNote: { fontSize: 15, color: C.sub, textAlign: 'center', lineHeight: 22, paddingHorizontal: 8 },
+
   practiceLead: { fontSize: 17, color: C.sub, marginTop: 14, lineHeight: 26 },
   sectionHead: { fontSize: 20, fontWeight: W.extra, color: C.ink, marginTop: 4 },
-  sectionSub: { fontSize: 14.5, color: C.sub, lineHeight: 21, marginBottom: 4 },
+  sectionSub: { fontSize: 14.5, color: C.sub, lineHeight: 21, marginBottom: 4, marginTop: 10 },
+
+  segBar: {
+    flexDirection: 'row', gap: 8, marginTop: 14, padding: 5,
+    backgroundColor: C.soft, borderRadius: 16, borderWidth: 1.5, borderColor: C.line,
+  },
+  segBtn: { flex: 1, minHeight: 54, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  segBtnOn: { backgroundColor: C.accFill, borderWidth: 1.5, borderColor: C.accEdge },
+  segTx: { fontSize: 18, fontWeight: W.bold, color: C.sub },
+  segTxOn: { color: C.onAcc, fontWeight: W.extra },
   readOk: { fontSize: 18, fontWeight: W.bold, color: C.acc, textAlign: 'center' },
   setCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,

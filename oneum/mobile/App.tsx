@@ -8,6 +8,7 @@
  *    · ⑭′ 빠른 발화 재생 — 사전 승인(연습 검증 + 문장 단위 등록)을 마친 문장만,
  *      DD-05의 6조건 판정기를 전부 통과한 뒤 0.5초 미리보기를 거쳐서
  */
+import './lib/font'   // 전역 서체 패치 — 반드시 다른 화면 import보다 먼저
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
@@ -16,7 +17,7 @@ import { StatusBar } from 'expo-status-bar'
 import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder } from 'expo-audio'
 import * as Speech from 'expo-speech'
 
-import { fetchEngineInfo, privacyNotice, recognize, recover, type EngineInfo } from './lib/api'
+import { chat, fetchEngineInfo, privacyNotice, recognize, recover, type ChatTurn, type EngineInfo } from './lib/api'
 import { rerank, type RankedCandidate } from './lib/rerank'
 import { similarity } from './lib/hangul'
 import {
@@ -28,15 +29,16 @@ import {
   registerQuick, type QuickEntry, type QuickEvent,
 } from './lib/quick'
 import { loadPrefs, savePrefs } from './lib/prefs'
+import { playSfx } from './lib/sfx'
 import { C, Btn, TabBar, layout, type TabKey } from './components/ui'
 import {
   ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, ListeningScreen,
 } from './screens/Core'
 import { EditScreen, OnboardScreen } from './screens/Support'
 import {
-  ConsentScreen, PracticeHomeScreen, PracticeResultScreen, PracticeRunScreen,
-  QuickHistoryScreen, QuickPlayingScreen, QuickPreviewScreen,
-  type ConsentKey, type PracticeSet,
+  AiChatScreen, ChatHomeScreen, ConsentScreen, PracticeHomeScreen, PracticeResultScreen,
+  PracticeRunScreen, QuickHistoryScreen, QuickPlayingScreen, QuickPreviewScreen,
+  type ChatScenario, type ConsentKey, type PracticeSet,
 } from './screens/Practice'
 
 /** 확정 게이트 임계값 — 재정렬 점수 기준. 보정 전 임시값이며 당사자 검증 발화로 재설정한다(BC-04). */
@@ -48,7 +50,7 @@ const PRACTICE_PASS = 0.85
 type Screen =
   | 'home' | 'listening' | 'processing' | 'confirmSure' | 'confirmChoice' | 'edit' | 'deliver'
   | 'fail' | 'onboard' | 'consent' | 'practiceHome' | 'practiceRun' | 'practiceResult'
-  | 'quickPreview' | 'quickPlaying' | 'quickHistory'
+  | 'quickPreview' | 'quickPlaying' | 'quickHistory' | 'chatHome' | 'aiChat'
 
 /** 언어재활사 자문 전 초안 세트(BC-08) — 문구는 자문 후 확정한다. */
 const PRESETS: { text: string; situation: Situation }[] = [
@@ -98,6 +100,17 @@ const READING_SETS: PracticeSet[] = [
   },
 ]
 
+// AI 대화 연습 시나리오 — 상대역·상황을 백엔드 프롬프트로 넘긴다.
+// 실사용(말하기 탭)과 분리된 '연습 상대'다. 여기서 나온 AI 문장은 남에게 전달되지 않는다(DD-02).
+const CHAT_SCENARIOS: ChatScenario[] = [
+  { name: '병원 접수처', situation: '병원',
+    scenario: '병원 접수처 직원. 접수하러 온 사용자를 응대한다. 이름·증상·예약 여부를 차분히 묻는다.' },
+  { name: '카페에서 주문', situation: '매장',
+    scenario: '카페 점원. 음료를 주문하러 온 사용자를 응대한다. 메뉴·크기·포장 여부를 묻는다.' },
+  { name: '주민센터 민원', situation: '공공기관',
+    scenario: '주민센터 민원 창구 직원. 서류를 떼러 온 사용자를 응대한다. 필요한 서류와 신분 확인을 안내한다.' },
+]
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [situation, setSituation] = useState<Situation>('일상')
@@ -132,6 +145,13 @@ export default function App() {
   // 않아 정확한 기기명은 못 얻지만, 재생 시작/종료로 상태만 갱신해 최소한 정직하게 둔다.
   const [outputDevice] = useState('이 휴대폰')
 
+  // AI 대화 연습(반실시간) 상태
+  const [chatScenario, setChatScenario] = useState<ChatScenario | null>(null)
+  const [chatMsgs, setChatMsgs] = useState<ChatTurn[]>([])
+  const [chatRec, setChatRec] = useState(false)
+  const [chatBusy, setChatBusy] = useState(false)
+  const [chatNote, setChatNote] = useState('')
+
   const [quickEvents, setQuickEvents] = useState<QuickEvent[]>([])
   const [runSet, setRunSet] = useState<PracticeSet | null>(null)
   const [runIndex, setRunIndex] = useState(0)
@@ -139,7 +159,8 @@ export default function App() {
   const [runHeard, setRunHeard] = useState<string[]>([])
   const [practiceRec, setPracticeRec] = useState(false)
 
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY)
+  // 레벨 측정(metering)을 켠다 — 듣는 중 화면의 파동이 목소리 크기에 실시간으로 반응한다
+  const recorder = useAudioRecorder({ ...RecordingPresets.HIGH_QUALITY, isMeteringEnabled: true })
   const lastAsr = useRef('')
 
   useEffect(() => {
@@ -160,6 +181,8 @@ export default function App() {
       const perm = await AudioModule.requestRecordingPermissionsAsync()
       if (!perm.granted) { setError('마이크 권한이 필요해요'); return }
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
+      // 효과음을 먼저 내고 준비하는 동안 잦아들게 한다 — 신호음이 녹음에 실리는 것을 줄인다
+      playSfx('start')
       await recorder.prepareToRecordAsync()
       recorder.record()
       setScreen('listening')
@@ -172,6 +195,7 @@ export default function App() {
     setScreen('processing')
     try {
       await recorder.stop()
+      playSfx('stop')
       const uri = recorder.uri
       if (!uri) throw new Error('녹음 파일이 만들어지지 않았어요')
 
@@ -230,6 +254,7 @@ export default function App() {
   /* ── 확정 → 전달 ─────────────────────────────────────────── */
   // topImmediate: ③ 확인 A에서 1순위를 그대로 확정했는가 — 실전 해금 경로(조건 2-b)의 재료
   const confirm = useCallback(async (text: string, topImmediate = false) => {
+    playSfx('confirm')
     setConfirmed(text)
     setRetries(0)
     setQuickSuggest(false)
@@ -273,6 +298,7 @@ export default function App() {
         const perm = await AudioModule.requestRecordingPermissionsAsync()
         if (!perm.granted) { setError('마이크 권한이 필요해요'); return }
         await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
+        playSfx('start')
         await recorder.prepareToRecordAsync()
         recorder.record()
         setPracticeRec(true)
@@ -285,6 +311,7 @@ export default function App() {
     let heardText = ''
     try {
       await recorder.stop()
+      playSfx('stop')
       const uri = recorder.uri
       if (uri) {
         const res = await recognize(uri)
@@ -300,6 +327,85 @@ export default function App() {
     if (runRound < 3) setRunRound((runRound + 1) as 2 | 3)
     else setScreen('practiceResult')
   }, [practiceRec, practiceSentence, recorder, runHeard, runRound])
+
+  /* ── AI 대화 연습 — 반실시간 턴 방식 (연습 탭 전용) ────────── */
+  // 소리 내어 읽어 주는 공통 도우미. 새 말을 시작하기 전 이전 발화를 멈춘다.
+  const speakKo = useCallback((text: string) => {
+    Speech.stop()
+    if (text) Speech.speak(text, { language: 'ko-KR' })
+  }, [])
+
+  const startChat = useCallback(async (s: ChatScenario) => {
+    setChatScenario(s)
+    setChatMsgs([])
+    setChatNote('')
+    setChatRec(false)
+    setScreen('aiChat')
+    setChatBusy(true)
+    // 이력이 비어 있으면 AI가 상대역으로서 먼저 인사하며 대화를 연다
+    const opener = await chat({ situation: s.situation, scenario: s.scenario, history: [] })
+    setChatMsgs([{ role: 'ai', text: opener }])
+    setChatBusy(false)
+    speakKo(opener)
+  }, [speakKo])
+
+  const chatRecord = useCallback(async () => {
+    if (chatBusy) return
+    if (!chatRec) {
+      setChatNote('')
+      try {
+        const perm = await AudioModule.requestRecordingPermissionsAsync()
+        if (!perm.granted) { setChatNote('마이크 권한이 필요해요'); return }
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
+        Speech.stop()                       // AI가 말하는 중이면 멈추고 사용자 말을 듣는다
+        playSfx('start')
+        await recorder.prepareToRecordAsync()
+        recorder.record()
+        setChatRec(true)
+      } catch {
+        setChatNote('녹음을 시작하지 못했어요')
+      }
+      return
+    }
+    // 녹음을 멈추고 전사한다 — 확정 게이트 없이 바로 상대역에게 넘긴다(연습 상대이므로).
+    setChatRec(false)
+    let heard = ''
+    try {
+      await recorder.stop()
+      playSfx('stop')
+      const uri = recorder.uri
+      if (uri) {
+        const res = await recognize(uri)
+        heard = res.candidates[0]?.text ?? ''
+      }
+    } catch {
+      heard = ''
+    }
+    if (!heard) {
+      setChatNote('잘 못 들었어요. 다시 한 번 눌러서 말해 주세요.')
+      return
+    }
+    const history: ChatTurn[] = [...chatMsgs, { role: 'user', text: heard }]
+    setChatMsgs(history)
+    setChatNote('')
+    setChatBusy(true)
+    const reply = await chat({
+      situation: chatScenario?.situation ?? '일상',
+      scenario: chatScenario?.scenario ?? '',
+      history,
+    })
+    setChatMsgs([...history, { role: 'ai', text: reply }])
+    setChatBusy(false)
+    speakKo(reply)
+  }, [chatBusy, chatRec, recorder, chatMsgs, chatScenario, speakKo])
+
+  const exitChat = useCallback(async () => {
+    Speech.stop()
+    if (chatRec) { try { await recorder.stop() } catch { /* 이미 멈춘 경우 무시 */ } }
+    setChatRec(false)
+    setChatBusy(false)
+    setScreen('chatHome')
+  }, [chatRec, recorder])
 
   // 연습 세트 커버리지 실계산 — total은 그 상황의 연습 문장 수, verified는 실제 등록 수.
   // draft는 언어재활사 자문 전 초안 표기(BC-08).
@@ -320,14 +426,16 @@ export default function App() {
     // 내 표현 등록·연습·기록은 모두 '연습' 탭에 속한다
     onboard: 'practice', practiceHome: 'practice', consent: 'practice',
     practiceRun: 'practice', practiceResult: 'practice', quickHistory: 'practice',
+    chatHome: 'chat', aiChat: 'chat',
   }
   // 탭 바는 각 탭의 '첫 화면'에서만 보인다. 하위(문장 등록·연습 진행)에서는 뒤로 버튼으로 돌아온다.
-  const TAB_ROOT: Screen[] = ['home', 'practiceHome']
+  const TAB_ROOT: Screen[] = ['home', 'practiceHome', 'chatHome']
   const activeTab = TAB_OF[screen]
   const showTabBar = TAB_ROOT.includes(screen)
 
   const goTab = (k: TabKey) => {
     if (k === 'home') setScreen('home')
+    else if (k === 'chat') setScreen('chatHome')
     // 연습은 최초 진입 시 동의(BC-07)를 먼저 거친다
     else setScreen(consentAsked ? 'practiceHome' : 'consent')
   }
@@ -345,7 +453,7 @@ export default function App() {
       />
     )
   } else if (screen === 'listening') {
-    content = <ListeningScreen onStop={stopRecording} onCancel={cancelRecording} />
+    content = <ListeningScreen recorder={recorder} onStop={stopRecording} onCancel={cancelRecording} />
   } else if (screen === 'processing') {
     content = (
       <View style={[layout.body, st.center]}>
@@ -449,6 +557,21 @@ export default function App() {
     )
   } else if (screen === 'quickHistory') {
     content = <QuickHistoryScreen events={quickEvents} onBack={() => setScreen('practiceHome')} />
+  } else if (screen === 'chatHome') {
+    content = <ChatHomeScreen scenarios={CHAT_SCENARIOS} onStartChat={startChat} />
+  } else if (screen === 'aiChat') {
+    content = (
+      <AiChatScreen
+        title={chatScenario?.name ?? 'AI와 대화'}
+        messages={chatMsgs}
+        recording={chatRec}
+        busy={chatBusy}
+        note={chatNote}
+        onRecord={chatRecord}
+        onReplay={speakKo}
+        onBack={exitChat}
+      />
+    )
   } else if (screen === 'practiceRun' && runSet) {
     content = (
       <PracticeRunScreen

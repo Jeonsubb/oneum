@@ -28,10 +28,11 @@ export type Colors = {
 }
 
 const PALETTES: Record<Palette, Colors> = {
+  // 쨍한 파랑 + 옅은 라벤더 배경(#F4F4FF). 채움이 진하므로 채움 위 글자(onAcc)는 흰색.
   blue: {
-    ink: '#191B1E', sub: '#43474D', line: '#C3C6CC', soft: '#F2F4F6',
-    acc: '#14508C', accTint: '#E8F0FA', accFill: '#14508C', onAcc: '#FFFFFF', accEdge: '#14508C',
-    warn: '#7A4100', warnBg: '#FAEEDC', accShadow: 'rgba(20,80,140,.30)', bg: '#FFFFFF',
+    ink: '#191B1E', sub: '#43474D', line: '#C3C6CC', soft: '#ECECF6',
+    acc: '#1D5DEC', accTint: '#E3EBFF', accFill: '#2563EB', onAcc: '#FFFFFF', accEdge: '#1D4ED8',
+    warn: '#7A4100', warnBg: '#FAEEDC', accShadow: 'rgba(37,99,235,.35)', bg: '#F4F4FF',
   },
   green: {
     ink: '#171A18', sub: '#414945', line: '#C1C8C3', soft: '#F0F4F1',

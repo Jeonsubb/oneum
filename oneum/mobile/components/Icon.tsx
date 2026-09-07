@@ -5,7 +5,7 @@ import Svg, { Path, Circle, Rect } from 'react-native-svg'
 
 export type IconName =
   | 'mic' | 'micoff' | 'vol' | 'voloff' | 'star' | 'check' | 'x' | 'xcirc'
-  | 'chev' | 'back' | 'redo' | 'warn' | 'pencil' | 'type' | 'gear' | 'plus' | 'phone'
+  | 'chev' | 'back' | 'redo' | 'warn' | 'pencil' | 'type' | 'gear' | 'plus' | 'phone' | 'chat'
 
 type P = { name: IconName; size?: number; color?: string }
 
@@ -68,6 +68,10 @@ export function Icon({ name, size = 24, color = 'currentColor' }: P) {
       {name === 'phone' && (<>
         <Rect {...common} x="7.5" y="2.5" width="9" height="19" rx="2.5" />
         <Path {...common} d="M11 18.5h2" />
+      </>)}
+      {name === 'chat' && (<>
+        <Path {...common} d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-4.5 3.5V6.5z" />
+        <Path {...common} d="M8.5 9.5h7" /><Path {...common} d="M8.5 13h4.5" />
       </>)}
     </Svg>
   )

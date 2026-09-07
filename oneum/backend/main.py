@@ -400,3 +400,102 @@ async def recover(req: RecoverRequest):
         return {"suggestions": [], "provider": LLM_PROVIDER, "error": "llm_unavailable"}
 
     return {"suggestions": parse_suggestions(raw), "provider": LLM_PROVIDER}
+
+
+# ── AI 대화 연습 (반실시간 턴 방식) ──────────────────────────────────────────
+# 연습 탭 전용이다. 실사용(말하기 탭)과 철저히 분리한다 — 여기서 AI가 만든 문장은
+# 사용자의 발화로 상대에게 전달되지 않는다. AI는 어디까지나 '연습 상대'다(DD-02와 정합).
+# 흐름: 사용자가 말함 → 우리 ASR로 전사 → 그 텍스트와 대화 이력을 여기로 보냄
+#       → 상황에 맞는 상대역 응답 1턴을 받음 → 클라이언트가 화면에 띄우고 TTS로 읽어 줌.
+
+CHAT_SYSTEM = """당신은 구음장애인의 말하기 연습을 돕는 대화 상대역이다.
+주어진 상황에서 사용자가 만나는 상대(병원 접수처 직원, 카페 점원, 약사 등)를 자연스럽게 연기한다.
+
+규칙:
+- 한 번에 한두 문장으로 짧고 명료하게 말한다. 긴 설명을 늘어놓지 않는다.
+- 쉬운 한국어를 쓴다. 어려운 낱말이나 외래어를 피한다.
+- 사용자의 발음이나 문장을 지적하거나 고쳐 주지 않는다. 알아들은 대로 자연스럽게 대화를 이어간다.
+- 사용자가 다음에 말할 거리를 자연스럽게 만들어 주는 질문이나 반응을 한다.
+- 대화 이력이 비어 있으면, 당신이 먼저 그 상황에 맞게 상대역으로서 인사하고 대화를 연다.
+- 사용자의 말이 잘 이해되지 않으면 되물어 준다("죄송해요, 한 번만 더 말씀해 주시겠어요?").
+- 상황과 무관한 이야기로 새지 않는다. 연습이 끝날 때까지 그 상황 안에 머무른다.
+
+반드시 아래 JSON만 출력한다. 설명·인사말 접두사·코드펜스를 붙이지 않는다.
+{"reply": "상대역의 다음 한 마디"}"""
+
+
+class ChatTurn(BaseModel):
+    role: str          # 'user' | 'ai'
+    text: str
+
+
+class ChatRequest(BaseModel):
+    situation: str = "일상"
+    scenario: str = ""             # 상대역·상황 설명 (예: "병원 접수처 직원. 접수하러 온 사용자를 응대한다.")
+    history: list[ChatTurn] = []    # 지금까지의 대화 (오래된 순)
+
+
+def build_chat_prompt(req: "ChatRequest") -> str:
+    if req.history:
+        lines = "\n".join(
+            f"{'사용자' if t.role == 'user' else '상대역'}: {t.text}" for t in req.history[-12:]
+        )
+        convo = f"[지금까지의 대화]\n{lines}\n\n상대역으로서 다음 한 마디를 말하라."
+    else:
+        convo = "[아직 대화가 시작되지 않았다]\n상대역으로서 먼저 인사하고 대화를 열어라."
+    return f"[상황] {req.situation}\n[상대역] {req.scenario or '상황에 맞는 대화 상대'}\n\n{convo}"
+
+
+def parse_reply(raw: str) -> str:
+    """모델 출력에서 상대역의 한 마디를 뽑는다. JSON이 깨져 오면 본문을 그대로 쓴다."""
+    if not raw:
+        return ""
+    text = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if match:
+        try:
+            data = json.loads(match.group(0))
+            reply = data.get("reply")
+            if isinstance(reply, str) and reply.strip():
+                return reply.strip()
+        except json.JSONDecodeError:
+            pass
+    return text[:200]
+
+
+# 키 없이 흐름을 시연하기 위한 목 응답. 상황별로 그럴듯한 상대역 한 마디를 돌아가며 준다.
+MOCK_CHAT = {
+    "병원": ["안녕하세요, 어떻게 오셨어요?", "네, 성함이 어떻게 되세요?",
+             "잠시만 기다려 주세요. 곧 안내해 드릴게요.", "많이 불편하셨겠어요. 접수 도와드릴게요."],
+    "매장": ["어서 오세요, 무엇을 드릴까요?", "네, 사이즈는 어떤 걸로 하시겠어요?",
+             "포장해 드릴까요, 드시고 가세요?", "결제는 카드로 하시겠어요?"],
+    "공공기관": ["안녕하세요, 어떤 일로 오셨어요?", "네, 신분증 가지고 오셨을까요?",
+                 "잠시만요, 서류 확인해 드릴게요.", "여기 창구에서 도와드리겠습니다."],
+    "일상": ["안녕하세요, 오늘 어떠세요?", "네, 천천히 말씀하셔도 괜찮아요.",
+             "그러셨군요. 더 하실 말씀 있으세요?", "잘 들었어요. 편하게 이야기해 주세요."],
+}
+
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+    """AI 대화 연습의 상대역 응답 1턴을 돌려준다. 실패하면 되묻는 안전 문구로 대체한다."""
+    if LLM_PROVIDER == "mock":
+        bank = MOCK_CHAT.get(req.situation, MOCK_CHAT["일상"])
+        # 대화 이력 길이에 따라 다음 줄을 고른다 — 키 없이도 대화가 진행되는 느낌을 준다
+        turn = len([t for t in req.history if t.role == "ai"])
+        return {"reply": bank[turn % len(bank)], "provider": "mock"}
+
+    fn = PROVIDERS.get(LLM_PROVIDER)
+    if fn is None:
+        return {"reply": "", "error": f"알 수 없는 LLM_PROVIDER: {LLM_PROVIDER}"}
+
+    try:
+        raw = await fn(CHAT_SYSTEM, build_chat_prompt(req))
+    except Exception as exc:
+        print(f"[chat] {LLM_PROVIDER} 호출 실패: {type(exc).__name__}: {exc}")
+        # 대화가 끊기지 않도록 되묻는 문구로 잇는다
+        return {"reply": "죄송해요, 잘 못 들었어요. 한 번만 더 말씀해 주시겠어요?",
+                "provider": LLM_PROVIDER, "error": "llm_unavailable"}
+
+    reply = parse_reply(raw)
+    return {"reply": reply or "네, 계속 말씀해 주세요.", "provider": LLM_PROVIDER}

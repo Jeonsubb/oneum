@@ -67,6 +67,37 @@ export async function recover(payload: {
   }
 }
 
+export interface ChatTurn {
+  role: 'user' | 'ai'
+  text: string
+}
+
+/** AI 대화 연습(반실시간 턴 방식)의 상대역 한 마디를 받는다 — 연습 탭 전용.
+ *  느리거나 실패하면 대화가 끊기지 않게 되묻는 문구로 대체한다. */
+export async function chat(payload: {
+  situation: string
+  scenario: string
+  history: ChatTurn[]
+}): Promise<string> {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), 15000)
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+    })
+    if (!res.ok) return '죄송해요, 잠시 문제가 있었어요. 한 번만 더 말씀해 주세요.'
+    const json = await res.json()
+    return typeof json.reply === 'string' ? json.reply : ''
+  } catch {
+    return '죄송해요, 연결이 잠깐 끊겼어요. 다시 말씀해 주시겠어요?'
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export interface EngineInfo {
   asr: string
   llm: string

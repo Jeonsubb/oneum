@@ -38,7 +38,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/KoddiUDOnGothic-Regular.ttf",
+            "./assets/fonts/KoddiUDOnGothic-Bold.ttf",
+            "./assets/fonts/KoddiUDOnGothic-ExtraBold.ttf"
+          ]
+        }
+      ]
     ],
     "extra": {
       "eas": {
