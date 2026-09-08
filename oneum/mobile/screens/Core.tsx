@@ -6,12 +6,15 @@
  *   3. 실패해도 대화는 계속 — 막다른 화면을 만들지 않는다
  *   4. 한 화면 한 작업
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useAudioRecorderState, type AudioRecorder } from 'expo-audio'
 import { Icon } from '../components/Icon'
 import { Wordmark } from '../components/Wordmark'
-import { AppBar, Btn, C, Candidate, Chip, NoneOfThem, SilenceBadge, Spacer, layout } from '../components/ui'
+import {
+  AnimatedPressable, AppBar, Btn, C, Candidate, Chip, NoneOfThem, SilenceBadge, Spacer,
+  layout, usePressScale,
+} from '../components/ui'
 import { S, W } from '../lib/theme'
 
 export { SITUATIONS } from '../lib/profile'
@@ -56,12 +59,7 @@ export function HomeScreen({
       </ScrollView>
 
       <View style={st.micWrap}>
-        <Pressable onPress={onMicDown} accessibilityRole="button"
-          accessibilityLabel="눌러서 말하기. 누르면 듣기 시작하고, 다 말한 뒤 한 번 더 누르면 됩니다"
-          style={({ pressed }) => [st.micBtn, pressed && { opacity: 0.9 }]}>
-          <Icon name="mic" size={S.micIcon} color={C.onAcc} />
-          <Text style={st.micLabel}>눌러서 말하기</Text>
-        </Pressable>
+        <MicButton onPress={onMicDown} />
         <Text style={layout.guide}>누르면 듣기 시작해요.{'\n'}다 말한 뒤 한 번 더 눌러 주세요</Text>
       </View>
 
@@ -72,6 +70,33 @@ export function HomeScreen({
         </View>
       ) : null}
     </View>
+  )
+}
+
+/** 마이크 버튼 — 평상시 아주 느리게 숨쉬듯 커졌다 작아지고(눌러도 된다는 초대),
+ *  누르면 눌린 만큼 줄었다가 스프링으로 복귀한다(Shazam식 촉감). */
+function MicButton({ onPress }: { onPress: () => void }) {
+  const press = usePressScale(0.93)
+  const breath = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(breath, { toValue: 1, duration: 2100, useNativeDriver: true }),
+      Animated.timing(breath, { toValue: 0, duration: 2100, useNativeDriver: true }),
+    ]))
+    loop.start()
+    return () => loop.stop()
+  }, [breath])
+  const breathScale = breath.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] })
+  return (
+    <Animated.View style={{ transform: [{ scale: breathScale }] }}>
+      <AnimatedPressable onPress={onPress} accessibilityRole="button"
+        accessibilityLabel="눌러서 말하기. 누르면 듣기 시작하고, 다 말한 뒤 한 번 더 누르면 됩니다"
+        onPressIn={press.onPressIn} onPressOut={press.onPressOut}
+        style={[st.micBtn, { transform: [{ scale: press.scale }] }]}>
+        <Icon name="mic" size={S.micIcon} color={C.onAcc} />
+        <Text style={st.micLabel}>눌러서 말하기</Text>
+      </AnimatedPressable>
+    </Animated.View>
   )
 }
 
@@ -195,6 +220,17 @@ export function DeliverScreen({
   onQuickAccept?: () => void
   onQuickDismiss?: () => void
 }) {
+  // 대면 모드 — 문장만 화면 가득. 화면 어디를 눌러도 돌아온다.
+  const [zoom, setZoom] = useState(false)
+  if (zoom) {
+    return (
+      <Pressable style={st.zoomWrap} onPress={() => setZoom(false)}
+        accessibilityRole="button" accessibilityLabel={`${text}. 화면을 누르면 돌아갑니다`}>
+        <Text style={st.zoomTx} adjustsFontSizeToFit numberOfLines={5} minimumFontScale={0.4}>{text}</Text>
+        <Text style={st.zoomClose}>화면을 누르면 돌아가요</Text>
+      </Pressable>
+    )
+  }
   return (
     <View style={layout.body}>
       <View style={st.appbarRow}>
@@ -215,10 +251,16 @@ export function DeliverScreen({
         </View>
       )}
       {/* 점원·접수 직원이 1~2초에 읽는 화면. 확정 문장 외엔 아무것도 두지 않는다.
-          문장이 길면 글자를 줄여서라도 잘리지 않게 한다(받침 있는 한글이 아래로 잘리던 문제). */}
-      <View style={st.bigSayWrap}>
+          문장이 길면 글자를 줄여서라도 잘리지 않게 한다(받침 있는 한글이 아래로 잘리던 문제).
+          문장을 누르면 대면 모드 — 버튼까지 치우고 문장만 가득 띄운다(Apple 번역 앱의 대면 모드 참고). */}
+      <Pressable style={st.bigSayWrap} onPress={() => setZoom(true)}
+        accessibilityRole="button" accessibilityLabel="문장을 상대에게 크게 보여주기">
         <Text style={st.bigSay} adjustsFontSizeToFit numberOfLines={4} minimumFontScale={0.5}>{text}</Text>
-      </View>
+        <View style={st.zoomHintRow}>
+          <Icon name="chev" size={14} color={C.sub} />
+          <Text style={st.zoomHintTx}>문장을 누르면 상대에게 크게 보여줄 수 있어요</Text>
+        </View>
+      </Pressable>
       <View style={st.sayRow}>
         <Btn label={speaking ? '말하는 중…' : '소리로 말하기'} icon="vol" onPress={onSpeak}
           style={{ flex: 1, minHeight: 96 }} />
@@ -342,6 +384,19 @@ const st = StyleSheet.create({
     fontSize: S.bigSay, fontWeight: W.black, lineHeight: S.bigSay * 1.45,
     textAlign: 'center', letterSpacing: -0.5, color: C.ink, includeFontPadding: true,
   },
+  zoomHintRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 14 },
+  zoomHintTx: { fontSize: 13.5, color: C.sub, fontWeight: W.bold },
+  // 대면 모드 — 흰 바탕에 문장만. 상대가 한 걸음 떨어져서도 읽도록 화면을 통째로 쓴다.
+  zoomWrap: {
+    flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 20, paddingVertical: 30,
+  },
+  zoomTx: {
+    fontSize: S.bigSay * 1.35, fontWeight: W.black, lineHeight: S.bigSay * 1.35 * 1.4,
+    textAlign: 'center', letterSpacing: -0.5, color: C.ink, includeFontPadding: true,
+  },
+  zoomClose: { position: 'absolute', bottom: 26, fontSize: 14, color: C.sub, fontWeight: W.bold },
+
   sayRow: { flexDirection: 'row', gap: 14, alignItems: 'stretch' },
   devBox: {
     width: 124, borderWidth: 1.5, borderColor: C.line, borderRadius: 16, backgroundColor: C.soft,

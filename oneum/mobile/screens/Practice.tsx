@@ -5,7 +5,7 @@
  *  '실패'로 보이지 않게 하기 위해서다.
  */
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Icon } from '../components/Icon'
 import { AppBar, Btn, C, SilenceBadge, Spacer, layout } from '../components/ui'
 import { S, W } from '../lib/theme'
@@ -213,6 +213,25 @@ export function QuickHistoryScreen({
   )
 }
 
+/** 말풍선 등장 연출 — 새 말풍선이 아래에서 떠오르며 나타난다(스픽식).
+ *  key가 유지되는 기존 말풍선은 다시 재생되지 않고, 새로 추가된 것만 움직인다. */
+function BubbleIn({ children }: { children: React.ReactNode }) {
+  const v = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    Animated.timing(v, {
+      toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true,
+    }).start()
+  }, [v])
+  return (
+    <Animated.View style={{
+      opacity: v,
+      transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
+    }}>
+      {children}
+    </Animated.View>
+  )
+}
+
 /* ── AI 대화 연습 (반실시간 턴 방식) ──────────────────────── */
 /** 사용자가 말함 → 우리 ASR로 전사(사용자 말풍선) → AI 상대역 응답(말풍선 + TTS) → 반복.
  *  실시간 스트리밍이 아니라 '한 턴씩' 주고받는다. 확정 게이트는 없다 — 상대가 실제 사람이
@@ -240,23 +259,25 @@ export function AiChatScreen({
         contentContainerStyle={{ gap: 12, paddingBottom: 16 }}
         onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
       >
-        {messages.map((m, i) =>
-          m.role === 'ai' ? (
-            <Pressable key={i} onPress={() => onReplay(m.text)}
-              accessibilityRole="button" accessibilityLabel={`상대: ${m.text}, 눌러서 다시 듣기`}
-              style={[st.bubble, st.bubbleAi]}>
-              <View style={st.bubbleHead}>
-                <Icon name="vol" size={15} color={C.acc} />
-                <Text style={st.bubbleWho}>상대</Text>
+        {messages.map((m, i) => (
+          <BubbleIn key={i}>
+            {m.role === 'ai' ? (
+              <Pressable onPress={() => onReplay(m.text)}
+                accessibilityRole="button" accessibilityLabel={`상대: ${m.text}, 눌러서 다시 듣기`}
+                style={[st.bubble, st.bubbleAi]}>
+                <View style={st.bubbleHead}>
+                  <Icon name="vol" size={15} color={C.acc} />
+                  <Text style={st.bubbleWho}>상대</Text>
+                </View>
+                <Text style={st.bubbleTx}>{m.text}</Text>
+              </Pressable>
+            ) : (
+              <View style={[st.bubble, st.bubbleMe]}>
+                <Text style={[st.bubbleTx, { color: C.onAcc }]}>{m.text}</Text>
               </View>
-              <Text style={st.bubbleTx}>{m.text}</Text>
-            </Pressable>
-          ) : (
-            <View key={i} style={[st.bubble, st.bubbleMe]}>
-              <Text style={[st.bubbleTx, { color: C.onAcc }]}>{m.text}</Text>
-            </View>
-          ),
-        )}
+            )}
+          </BubbleIn>
+        ))}
         {busy && (
           <View style={[st.bubble, st.bubbleAi, { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
             <ActivityIndicator size="small" color={C.acc} />

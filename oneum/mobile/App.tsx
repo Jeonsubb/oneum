@@ -30,7 +30,7 @@ import {
 } from './lib/quick'
 import { loadPrefs, savePrefs } from './lib/prefs'
 import { playSfx } from './lib/sfx'
-import { C, Btn, TabBar, layout, type TabKey } from './components/ui'
+import { C, Btn, ScreenFade, TabBar, layout, type TabKey } from './components/ui'
 import {
   ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, ListeningScreen,
 } from './screens/Core'
@@ -642,7 +642,7 @@ export default function App() {
             <Btn label="닫기" variant="outline" onPress={() => setError('')} style={{ width: 96, minHeight: 48 }} />
           </View>
         ) : null}
-        <View style={{ flex: 1 }}>{content}</View>
+        <ScreenFade id={screen}>{content}</ScreenFade>
         {showTabBar && activeTab && <TabBar active={activeTab} onSelect={goTab} />}
       </SafeAreaView>
     </SafeAreaProvider>

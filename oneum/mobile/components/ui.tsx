@@ -1,11 +1,45 @@
 /** 목업(UI MOCKUP v3)의 공통 UI 조각.
  *  색상 버전은 파랑(딥블루 #14508C)으로 확정했다. theme.ts의 다른 팔레트는 남겨두되 쓰지 않는다. */
-import { ReactNode } from 'react'
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { ReactNode, useEffect, useRef } from 'react'
+import { Animated, Easing, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import { Icon, IconName } from './Icon'
 import { palette, S, W } from '../lib/theme'
 
 export const C = palette('blue')
+
+export const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+
+/** 화면 전환 연출 — 새 화면이 아래에서 살짝 떠오르며 나타난다(토스식).
+ *  화면이 뚝 바뀌는 대신 방향감을 주어 흐름이 이어지는 느낌을 만든다.
+ *  id(현재 화면 이름)가 바뀔 때마다 다시 재생된다. */
+export function ScreenFade({ id, children }: { id: string; children: ReactNode }) {
+  const v = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    v.setValue(0)
+    Animated.timing(v, {
+      toValue: 1, duration: 230, easing: Easing.out(Easing.cubic), useNativeDriver: true,
+    }).start()
+  }, [id, v])
+  return (
+    <Animated.View style={{
+      flex: 1, opacity: v,
+      transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }],
+    }}>
+      {children}
+    </Animated.View>
+  )
+}
+
+/** 눌림 반응 공통 훅 — 누르면 살짝 줄었다가 스프링으로 복귀한다.
+ *  투명도만 바뀌던 기존 반응보다 "눌렀다"는 확신을 손끝에 준다(운동 조절이 어려운 사용자 배려). */
+export function usePressScale(pressedScale = 0.97) {
+  const v = useRef(new Animated.Value(1)).current
+  const onPressIn = () =>
+    Animated.timing(v, { toValue: pressedScale, duration: 90, useNativeDriver: true }).start()
+  const onPressOut = () =>
+    Animated.spring(v, { toValue: 1, friction: 5, tension: 220, useNativeDriver: true }).start()
+  return { scale: v, onPressIn, onPressOut }
+}
 
 /** "확정 전에는 소리내지 않아요" — 목업의 .silence.
  *  Relate·Live Speech·Voiceitt는 인식 즉시 말한다. 온음은 확정 전 침묵하며,
@@ -34,27 +68,32 @@ export function Btn({ label, onPress, variant = 'primary', icon, xl, style, disa
   const isPrimary = variant === 'primary'
   const isTonal = variant === 'tonal'
   const fg = isPrimary ? C.onAcc : C.ink
+  const press = usePressScale(0.97)
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: !!disabled }}
       onPress={onPress}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
       disabled={disabled}
-      style={({ pressed }) => [
+      style={[
         st.btn,
         isPrimary && { backgroundColor: C.accFill, borderColor: C.accEdge },
+        // 주 버튼에만 옅은 그림자 — "이걸 누르면 된다"는 위계를 색과 깊이로 함께 전달(토스식)
+        isPrimary && !disabled && st.btnShadow,
         variant === 'outline' && { backgroundColor: '#fff', borderColor: '#75787D' },
         isTonal && { backgroundColor: C.soft, borderColor: C.line, minHeight: S.btnTonalMin },
         xl && { minHeight: S.btnXlMin },
-        pressed && { opacity: 0.85 },
         disabled && { opacity: 0.45 },
         style,
+        { transform: [{ scale: press.scale }] },
       ]}
     >
       {icon && <Icon name={icon} size={24} color={fg} />}
       <Text style={[st.btnTx, { color: fg }, (xl || isTonal) && { fontSize: S.btnXlFont }]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   )
 }
 
@@ -173,6 +212,10 @@ const st = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 18,
   },
   btnTx: { fontSize: S.btnFont, fontWeight: W.extra, textAlign: 'center' },
+  btnShadow: {
+    shadowColor: C.acc, shadowOpacity: 0.28, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 }, elevation: 4,
+  },
 
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: S.chipMin,
@@ -180,10 +223,14 @@ const st = StyleSheet.create({
   },
   chipTx: { fontSize: S.chipFont, fontWeight: W.bold, color: C.sub },
 
+  // 후보 카드 — 굵은 테두리 대신 흰 카드 + 옅은 그림자로 배경에서 띄운다(토스식).
+  // 선택지라는 사실은 테두리 굵기가 아니라 카드의 부피감으로 전달한다.
   cand: {
     flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: S.candMin,
-    borderWidth: 2, borderColor: '#85888E', borderRadius: S.candRadius,
+    borderWidth: 1.5, borderColor: '#DDE0E8', borderRadius: 20,
     paddingVertical: 16, paddingRight: 14, paddingLeft: 22, backgroundColor: '#fff',
+    shadowColor: '#1B2B5C', shadowOpacity: 0.08, shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 }, elevation: 3,
   },
   candTap: { flex: 1, justifyContent: 'center', minHeight: 60 },
   candTx: { fontSize: S.candFont, fontWeight: W.bold, lineHeight: S.candFont * 1.4, color: C.ink },
