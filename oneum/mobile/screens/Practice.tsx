@@ -5,7 +5,7 @@
  *  '실패'로 보이지 않게 하기 위해서다.
  */
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { Icon } from '../components/Icon'
 import { AppBar, Btn, C, SilenceBadge, Spacer, layout } from '../components/ui'
 import { S, W } from '../lib/theme'
@@ -43,13 +43,13 @@ export function ConsentScreen({
               accessibilityRole="switch" accessibilityState={{ checked: on }}
               accessibilityLabel={`${it.title}, ${on ? '동의함' : '동의 안 함'}`}
               style={[st.consentCard, on && { borderColor: C.acc, backgroundColor: C.accTint }]}>
-              <View style={[st.checkbox, on && { backgroundColor: C.accFill, borderColor: C.accEdge }]}>
-                {on && <Icon name="check" size={20} color={C.onAcc} />}
-              </View>
               <View style={{ flex: 1 }}>
                 <Text style={st.consentTitle}>{it.title}</Text>
                 <Text style={st.consentDesc}>{it.desc}</Text>
               </View>
+              {/* iOS 네이티브 스위치 — 설정 앱과 같은 조작 문법 */}
+              <Switch value={on} onValueChange={() => onToggle(it.key)}
+                trackColor={{ true: C.acc, false: undefined }} />
             </Pressable>
           )
         })}
@@ -113,7 +113,7 @@ export function PracticeHomeScreen({
 
   return (
     <View style={layout.body}>
-      <AppBar title="연습" />
+      <AppBar title="연습" large />
 
       {/* 상단 전환 바 — 누른 갈래의 세트만 보인다 */}
       <View style={st.segBar} accessibilityRole="tablist">
@@ -148,7 +148,7 @@ export function ChatHomeScreen({
 }: { scenarios: ChatScenario[]; onStartChat: (s: ChatScenario) => void }) {
   return (
     <View style={layout.body}>
-      <AppBar title="대화" />
+      <AppBar title="대화" large />
       <ScrollView style={{ marginTop: 14 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
         {scenarios.map(s => (
           <View key={s.name} style={st.setCard}>

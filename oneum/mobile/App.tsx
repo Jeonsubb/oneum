@@ -30,6 +30,7 @@ import {
 } from './lib/quick'
 import { loadPrefs, savePrefs } from './lib/prefs'
 import { playSfx } from './lib/sfx'
+import { hapticConfirm, hapticRecord, hapticSelect } from './lib/haptics'
 import { C, Btn, ScreenFade, TABBAR_CONTENT_HEIGHT, TabBar, layout, type TabKey } from './components/ui'
 import {
   ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, LandingScreen,
@@ -186,6 +187,7 @@ export default function App() {
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
       // 효과음을 먼저 내고 준비하는 동안 잦아들게 한다 — 신호음이 녹음에 실리는 것을 줄인다
       playSfx('start')
+      hapticRecord()
       await recorder.prepareToRecordAsync()
       recorder.record()
       setScreen('listening')
@@ -199,6 +201,7 @@ export default function App() {
     try {
       await recorder.stop()
       playSfx('stop')
+      hapticRecord()
       const uri = recorder.uri
       if (!uri) throw new Error('녹음 파일이 만들어지지 않았어요')
 
@@ -258,6 +261,7 @@ export default function App() {
   // topImmediate: ③ 확인 A에서 1순위를 그대로 확정했는가 — 실전 해금 경로(조건 2-b)의 재료
   const confirm = useCallback(async (text: string, topImmediate = false) => {
     playSfx('confirm')
+    hapticConfirm()
     setConfirmed(text)
     setRetries(0)
     setQuickSuggest(false)
@@ -302,6 +306,8 @@ export default function App() {
         if (!perm.granted) { setError('마이크 권한이 필요해요'); return }
         await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
         playSfx('start')
+        hapticRecord()
+      hapticRecord()
         await recorder.prepareToRecordAsync()
         recorder.record()
         setPracticeRec(true)
@@ -315,6 +321,7 @@ export default function App() {
     try {
       await recorder.stop()
       playSfx('stop')
+      hapticRecord()
       const uri = recorder.uri
       if (uri) {
         const res = await recognize(uri)
@@ -362,6 +369,8 @@ export default function App() {
         await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
         Speech.stop()                       // AI가 말하는 중이면 멈추고 사용자 말을 듣는다
         playSfx('start')
+        hapticRecord()
+      hapticRecord()
         await recorder.prepareToRecordAsync()
         recorder.record()
         setChatRec(true)
@@ -376,6 +385,7 @@ export default function App() {
     try {
       await recorder.stop()
       playSfx('stop')
+      hapticRecord()
       const uri = recorder.uri
       if (uri) {
         const res = await recognize(uri)
@@ -448,6 +458,7 @@ export default function App() {
   const showTabBar = TAB_ROOT.includes(screen)
 
   const goTab = (k: TabKey) => {
+    hapticSelect()
     if (k === 'home') setScreen('home')
     else if (k === 'chat') setScreen('chatHome')
     // 연습은 최초 진입 시 동의(BC-07)를 먼저 거친다

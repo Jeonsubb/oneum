@@ -1,7 +1,8 @@
 /** 목업(UI MOCKUP v3)의 공통 UI 조각.
  *  색상 버전은 파랑(딥블루 #14508C)으로 확정했다. theme.ts의 다른 팔레트는 남겨두되 쓰지 않는다. */
 import { ReactNode, useEffect, useRef } from 'react'
-import { Animated, Easing, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { SymbolView } from 'expo-symbols'
 import { BlurView } from 'expo-blur'
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -156,7 +157,14 @@ export function NoneOfThem({ onPress }: { onPress: () => void }) {
   )
 }
 
-export function AppBar({ title, onBack, right }: { title?: string; onBack?: () => void; right?: ReactNode }) {
+export function AppBar({ title, onBack, right, large }: {
+  title?: string; onBack?: () => void; right?: ReactNode
+  /** iOS 큰 제목(Large Title) — 탭 루트 화면에서 좌측 대형 타이틀로 그린다 */
+  large?: boolean
+}) {
+  if (large && !onBack) {
+    return <Text style={st.largeTitle}>{title}</Text>
+  }
   return (
     <View style={st.appbar}>
       {onBack ? (
@@ -189,10 +197,11 @@ export function Spacer() { return <View style={{ flex: 1 }} /> }
  *  아이콘은 항상 한글 라벨과 함께 두고(목업 원칙 4), 터치 타깃을 크게 잡는다. */
 export type TabKey = 'home' | 'practice' | 'chat'
 
-const TAB_ITEMS: { key: TabKey; label: string; icon: IconName }[] = [
-  { key: 'home', label: '말하기', icon: 'mic' },
-  { key: 'practice', label: '연습', icon: 'redo' },
-  { key: 'chat', label: '대화', icon: 'chat' },
+// sf/sfOn: iOS에서는 시스템 SF Symbols를 그대로 쓴다 — 활성 탭은 채워진(fill) 심볼.
+const TAB_ITEMS: { key: TabKey; label: string; icon: IconName; sf: string; sfOn: string }[] = [
+  { key: 'home', label: '말하기', icon: 'mic', sf: 'mic', sfOn: 'mic.fill' },
+  { key: 'practice', label: '연습', icon: 'redo', sf: 'arrow.trianglehead.2.clockwise.rotate.90', sfOn: 'arrow.trianglehead.2.clockwise.rotate.90' },
+  { key: 'chat', label: '대화', icon: 'chat', sf: 'bubble.left', sfOn: 'bubble.left.fill' },
 ]
 
 /** 루트 화면 콘텐츠가 탭바에 가리지 않도록 확보해야 하는 하단 여백(세이프에어리어 제외). */
@@ -208,7 +217,12 @@ export function TabBar({ active, onSelect }: { active: TabKey; onSelect: (k: Tab
         accessibilityState={{ selected: on }}
         accessibilityLabel={`${t.label}${on ? ', 선택됨' : ''}`}
         style={st.tab}>
-        <Icon name={t.icon} size={27} color={on ? C.acc : '#8E8E93'} />
+        {Platform.OS === 'ios' ? (
+          <SymbolView name={(on ? t.sfOn : t.sf) as never} size={25}
+            tintColor={on ? C.acc : '#8E8E93'} weight="medium" />
+        ) : (
+          <Icon name={t.icon} size={27} color={on ? C.acc : '#8E8E93'} />
+        )}
         <Text style={[st.tabTx, on && { color: C.acc, fontWeight: W.extra }]}>{t.label}</Text>
       </Pressable>
     )
@@ -286,6 +300,8 @@ const st = StyleSheet.create({
     paddingHorizontal: 24, borderRadius: 999, overflow: 'hidden',
   },
   barTitle: { fontSize: 20, fontWeight: W.extra, color: C.ink },
+  // iOS Large Title — 34pt 좌측 정렬 굵은 제목 (설정·메시지 앱의 탭 루트와 같은 문법)
+  largeTitle: { fontSize: 32, fontWeight: W.extra, color: C.ink, marginTop: 6, letterSpacing: 0.2 },
 
   // iOS 26 탭바 — 좌우 여백을 두고 떠 있는 캡슐. 재질(글래스/블러)이 배경을 비춘다.
   tabBar: {
