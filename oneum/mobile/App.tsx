@@ -82,7 +82,7 @@ const PRACTICE_SET_DEFS: { name: string; situation: Situation }[] = [
 // 최종 지문 구성은 언어재활사 자문으로 확정한다(BC-08) — 지금은 '초안'.
 const READING_SETS: PracticeSet[] = [
   {
-    name: '시 — 엄마야 누나야 (김소월)', kind: 'reading', total: 4, verified: 0, draft: true,
+    name: '엄마야 누나야 (김소월 시)', kind: 'reading', total: 4, verified: 0, draft: true,
     sentences: ['엄마야 누나야 강변 살자', '뜰에는 반짝이는 금모래빛',
                 '뒷문 밖에는 갈잎의 노래', '엄마야 누나야 강변 살자'],
   },
@@ -93,7 +93,7 @@ const READING_SETS: PracticeSet[] = [
                 '눈길 교통사고에 주의해 주시기 바랍니다.'],
   },
   {
-    name: '문단 읽기 — 아침', kind: 'reading', total: 3, verified: 0, draft: true,
+    name: '아침 문단 읽기', kind: 'reading', total: 3, verified: 0, draft: true,
     sentences: ['아침에 일어나면 먼저 물을 한 잔 마십니다.',
                 '창문을 열어 방 안 공기를 바꿉니다.',
                 '천천히 몸을 움직이며 하루를 시작합니다.'],

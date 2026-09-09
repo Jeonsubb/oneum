@@ -45,12 +45,12 @@ export function HomeScreen({
         <Pressable onPress={onPauseQuick} style={st.quickBar} accessibilityRole="button"
           accessibilityLabel="빠른 발화 켜짐, 눌러서 일시 중지">
           <Icon name="vol" size={18} color={C.acc} />
-          <Text style={st.quickTx}>빠른 발화 켜짐 — 등록한 문장만</Text>
+          <Text style={st.quickTx}>빠른 발화 켜짐 · 등록한 문장만</Text>
           <Text style={st.quickPause}>일시 중지</Text>
         </Pressable>
       )}
 
-      <Text style={layout.fieldLabel}>지금 상황 — 직접 골라주세요</Text>
+      <Text style={layout.fieldLabel}>지금 상황을 골라주세요</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}
         style={st.chipsScroll} contentContainerStyle={st.chips}>
         {SITUATIONS.map(s => (
