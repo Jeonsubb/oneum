@@ -129,13 +129,7 @@ export function PracticeHomeScreen({
           )
         })}
       </View>
-      <Text style={st.sectionSub}>
-        {tab === 'situation'
-          ? '실제로 쓰는 짧은 문장을 연습하고, 빠른 발화로 등록합니다.'
-          : '시·뉴스 같은 긴 글을 소리 내어 읽으며 발음을 가다듬습니다. 점수도 등급도 없습니다.'}
-      </Text>
-
-      <ScrollView style={{ marginTop: 8 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
+      <ScrollView style={{ marginTop: 14 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
         {shown.map(card)}
       </ScrollView>
       <Btn label="내 표현 등록·정리" variant="outline" icon="plus" onPress={onManage}
@@ -155,10 +149,7 @@ export function ChatHomeScreen({
   return (
     <View style={layout.body}>
       <AppBar title="대화" />
-      <Text style={st.sectionSub}>
-        AI 상대와 실제 상황처럼 주고받으며 말하기를 연습합니다.{'\n'}여기서 나눈 말은 밖으로 전달되지 않아요.
-      </Text>
-      <ScrollView style={{ marginTop: 10 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
+      <ScrollView style={{ marginTop: 14 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
         {scenarios.map(s => (
           <View key={s.name} style={st.setCard}>
             <View style={{ flex: 1 }}>
@@ -169,6 +160,13 @@ export function ChatHomeScreen({
           </View>
         ))}
       </ScrollView>
+      {/* 말하기 화면의 개인정보 고지와 같은 형식 — 하단 회색 상자로 조용히 알린다 */}
+      <View style={st.chatIntro} accessibilityRole="text">
+        <Icon name="voloff" size={16} color={C.sub} />
+        <Text style={st.chatIntroTx}>
+          AI 상대와 실제 상황처럼 주고받으며 말하기를 연습합니다. 여기서 나눈 말은 밖으로 전달되지 않아요
+        </Text>
+      </View>
     </View>
   )
 }
@@ -487,6 +485,14 @@ const st = StyleSheet.create({
   },
   consentTitle: { fontSize: 18, fontWeight: W.extra, color: C.ink },
   consentDesc: { fontSize: 15, color: C.sub, marginTop: 4, lineHeight: 22 },
+
+  // 말하기 화면 하단 개인정보 고지와 같은 형식의 회색 상자
+  chatIntro: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12,
+    paddingVertical: 10, paddingHorizontal: 12,
+    backgroundColor: C.soft, borderRadius: 12, borderWidth: 1, borderColor: C.line,
+  },
+  chatIntroTx: { flex: 1, fontSize: 13.5, color: C.sub, lineHeight: 19 },
 
   bubble: { maxWidth: '86%', borderRadius: 18, paddingVertical: 12, paddingHorizontal: 16 },
   bubbleAi: {

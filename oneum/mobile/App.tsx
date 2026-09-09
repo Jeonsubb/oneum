@@ -407,6 +407,17 @@ export default function App() {
     setScreen('chatHome')
   }, [chatRec, recorder])
 
+  /** 연습에서 다음 문장으로 넘어간다. 세트의 마지막 문장이었다면 연습 홈으로 돌아간다
+   *  — 예전에는 끝없이 +1만 해서 "5/4 문장" 같은 표기가 나왔다. */
+  const practiceAdvance = useCallback(() => {
+    setRunRound(1)
+    setRunHeard([])
+    const count = runSet ? (runSet.sentences.length || runSet.total) : 0
+    if (!runSet || runIndex + 1 >= count) { setScreen('practiceHome'); return }
+    setRunIndex(runIndex + 1)
+    setScreen('practiceRun')
+  }, [runSet, runIndex])
+
   // 연습 세트 커버리지 실계산 — total은 그 상황의 연습 문장 수, verified는 실제 등록 수.
   // draft는 언어재활사 자문 전 초안 표기(BC-08).
   const situationSets: PracticeSet[] = PRACTICE_SET_DEFS.map(def => {
@@ -578,7 +589,7 @@ export default function App() {
         sentence={practiceSentence()} index={runIndex} total={runSet.total} round={runRound}
         recording={practiceRec}
         onRecord={practiceRecord}
-        onSkip={() => { setRunRound(1); setRunHeard([]); setRunIndex(i => i + 1) }}
+        onSkip={practiceAdvance}
         onBack={() => { setPracticeRec(false); setScreen('practiceHome') }}
       />
     )
@@ -602,11 +613,10 @@ export default function App() {
           } else {
             setError(`이 문장은 안전을 위해 빠른 발화로 등록할 수 없어요 (${r.reason})`)
           }
-          setRunRound(1); setRunHeard([]); setRunIndex(i => i + 1)
-          setScreen('practiceRun')
+          practiceAdvance()
         }}
         onRetry={() => { setRunRound(1); setRunHeard([]); setScreen('practiceRun') }}
-        onNext={() => { setRunRound(1); setRunHeard([]); setRunIndex(i => i + 1); setScreen('practiceRun') }}
+        onNext={practiceAdvance}
       />
     )
   } else if (screen === 'quickPreview') {

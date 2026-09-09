@@ -89,23 +89,16 @@ function MicButton({ onPress }: { onPress: () => void }) {
     return () => loop.stop()
   }, [breath])
   const breathScale = breath.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] })
-  const inner = (
-    <>
-      <Icon name="mic" size={S.micIcon} color={C.onAcc} />
-      <Text style={st.micLabel}>눌러서 말하기</Text>
-    </>
-  )
+  // 글래스 버전을 시험했으나 밝은 배경에서 틴트가 씻겨 흰 글자가 묻혔다.
+  // 핵심 CTA는 대비가 우선이므로 단색 파랑 원을 유지한다 (글래스는 탭바·뒤로 버튼에만).
   return (
     <Animated.View style={{ transform: [{ scale: breathScale }] }}>
       <AnimatedPressable onPress={onPress} accessibilityRole="button"
         accessibilityLabel="눌러서 말하기. 누르면 듣기 시작하고, 다 말한 뒤 한 번 더 누르면 됩니다"
         onPressIn={press.onPressIn} onPressOut={press.onPressOut}
-        style={[GLASS ? st.micWrapGlass : st.micBtn, { transform: [{ scale: press.scale }] }]}>
-        {GLASS ? (
-          <GlassView glassEffectStyle="regular" isInteractive tintColor={C.acc} style={st.micGlass}>
-            {inner}
-          </GlassView>
-        ) : inner}
+        style={[st.micBtn, { transform: [{ scale: press.scale }] }]}>
+        <Icon name="mic" size={S.micIcon} color={C.onAcc} />
+        <Text style={st.micLabel}>눌러서 말하기</Text>
       </AnimatedPressable>
     </Animated.View>
   )

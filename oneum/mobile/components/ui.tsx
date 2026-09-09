@@ -103,31 +103,18 @@ export function Btn({ label, onPress, variant = 'primary', icon, xl, style, disa
 }
 
 /** 상황 칩 — 목업의 .chip. 자동 추정하지 않고 사용자가 직접 고른다(DD-06).
- *  iOS 26에서는 리퀴드 글래스 캡슐로 그려진다(선택 시 파랑 틴트). */
+ *  글래스 캡슐을 시험했으나 밝은 단색 배경에서 형태가 사라져 단색 캡슐을 유지한다. */
 export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPress?: () => void }) {
-  const inner = (
-    <>
-      {on && <Icon name="check" size={18} color={C.onAcc} />}
-      <Text style={[st.chipTx, on && { color: C.onAcc }]}>{label}</Text>
-    </>
-  )
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: !!on }}
       accessibilityLabel={`상황 ${label}${on ? ', 선택됨' : ''}`}
       onPress={onPress}
+      style={[st.chip, on && { backgroundColor: C.accFill, borderColor: C.accEdge }]}
     >
-      {GLASS ? (
-        <GlassView glassEffectStyle="regular" isInteractive tintColor={on ? C.acc : undefined}
-          style={st.chipGlass}>
-          {inner}
-        </GlassView>
-      ) : (
-        <View style={[st.chip, on && { backgroundColor: C.accFill, borderColor: C.accEdge }]}>
-          {inner}
-        </View>
-      )}
+      {on && <Icon name="check" size={18} color={C.onAcc} />}
+      <Text style={[st.chipTx, on && { color: C.onAcc }]}>{label}</Text>
     </Pressable>
   )
 }
