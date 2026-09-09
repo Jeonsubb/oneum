@@ -29,13 +29,17 @@ import type { Situation } from '../lib/profile'
 export function LandingScreen({ onDone }: { onDone: () => void }) {
   const rise = useRef(new Animated.Value(0)).current   // 로고 페이드인
   const veil = useRef(new Animated.Value(1)).current   // 전체 페이드아웃
+  // sequence+delay 조합이 릴리스에서 즉시 완료되어 랜딩이 뜨자마자 사라지는 문제가 있었다.
+  // 타이머로 단계를 직접 제어하고, 마운트 시 한 번만 실행한다(리렌더 영향 차단).
   useEffect(() => {
-    Animated.sequence([
-      Animated.timing(rise, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.delay(2200),
-      Animated.timing(veil, { toValue: 0, duration: 500, useNativeDriver: true }),
-    ]).start(() => onDone())
-  }, [rise, veil, onDone])
+    Animated.timing(rise, { toValue: 1, duration: 600, useNativeDriver: true }).start()
+    const t = setTimeout(() => {
+      Animated.timing(veil, { toValue: 0, duration: 500, useNativeDriver: true })
+        .start(() => onDone())
+    }, 2800)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     // 그라데이션이 어떤 이유로든 그려지지 않아도 파란 화면은 보장한다(backgroundColor)
     <Animated.View pointerEvents="none"
