@@ -458,7 +458,7 @@ export default function App() {
     content = (
       <View style={[layout.body, st.center]}>
         <ActivityIndicator size="large" color={C.acc} />
-        <Text style={st.processingTx}>듣고 있어요…</Text>
+        <Text style={st.processingTx}>알아듣는 중이에요…</Text>
       </View>
     )
   } else if (screen === 'confirmSure') {
