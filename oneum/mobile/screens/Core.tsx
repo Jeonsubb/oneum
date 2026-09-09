@@ -32,13 +32,15 @@ export function LandingScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     Animated.sequence([
       Animated.timing(rise, { toValue: 1, duration: 550, useNativeDriver: true }),
-      Animated.delay(1000),
+      Animated.delay(1400),
       Animated.timing(veil, { toValue: 0, duration: 420, useNativeDriver: true }),
     ]).start(() => onDone())
   }, [rise, veil, onDone])
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, { opacity: veil, zIndex: 10 }]}
-      pointerEvents="none">
+    // 그라데이션이 어떤 이유로든 그려지지 않아도 파란 화면은 보장한다(backgroundColor)
+    <Animated.View pointerEvents="none"
+      style={[StyleSheet.absoluteFill,
+        { opacity: veil, zIndex: 100, elevation: 100, backgroundColor: '#0A84FF' }]}>
       <LinearGradient colors={['#0A84FF', '#0050C8']} style={st.landing}>
         <Animated.View style={{
           alignItems: 'center', gap: 16, opacity: rise,
@@ -80,9 +82,6 @@ export function HomeScreen({
         </Pressable>
       )}
 
-      {/* 서비스가 하는 일을 첫 문장으로 — 기능 설명이 아니라 약속의 어조로 말한다 */}
-      <Text style={st.heroCopy}>발음이 뭉개져도,{'\n'}당신의 말을 또렷하게 전할게요</Text>
-
       <Text style={st.situLabel}>지금 상황을 골라주세요</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}
         style={st.chipsScroll} contentContainerStyle={st.chips}>
@@ -94,7 +93,6 @@ export function HomeScreen({
       <View style={st.micWrap}>
         {/* 버튼 뒤에 겹겹이 번지는 옅은 파랑 — 소리가 퍼지는 자리라는 인상을 만든다 */}
         <View style={st.haloWrap}>
-          <View style={[st.halo, st.halo3]} />
           <View style={[st.halo, st.halo2]} />
           <View style={[st.halo, st.halo1]} />
           <MicButton onPress={onMicDown} />
@@ -392,18 +390,13 @@ const st = StyleSheet.create({
   landing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   landingTag: { fontSize: 17, fontWeight: W.bold, color: 'rgba(255,255,255,0.88)', letterSpacing: 0.5 },
 
-  heroCopy: {
-    fontSize: 25, fontWeight: W.extra, lineHeight: 25 * 1.42, color: C.ink,
-    marginTop: 22, letterSpacing: -0.3,
-  },
-  situLabel: { fontSize: 14.5, fontWeight: W.bold, color: C.sub, marginTop: 24 },
+  situLabel: { fontSize: 15, fontWeight: W.bold, color: C.sub, marginTop: 22 },
 
   micWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 26 },
   haloWrap: { alignItems: 'center', justifyContent: 'center' },
   halo: { position: 'absolute', borderRadius: 999 },
   halo1: { width: S.micSize * 1.32, height: S.micSize * 1.32, backgroundColor: 'rgba(0,122,255,0.10)' },
   halo2: { width: S.micSize * 1.68, height: S.micSize * 1.68, backgroundColor: 'rgba(0,122,255,0.06)' },
-  halo3: { width: S.micSize * 2.08, height: S.micSize * 2.08, backgroundColor: 'rgba(0,122,255,0.035)' },
   micBtn: {
     width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
     backgroundColor: C.accFill,
