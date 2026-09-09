@@ -96,7 +96,6 @@ export function HomeScreen({
       <View style={st.micWrap}>
         {/* 버튼 뒤에 겹겹이 번지는 옅은 파랑 — 소리가 퍼지는 자리라는 인상을 만든다 */}
         <View style={st.haloWrap}>
-          <View style={[st.halo, st.halo2]} />
           <View style={[st.halo, st.halo1]} />
           <MicButton onPress={onMicDown} />
         </View>
@@ -399,7 +398,6 @@ const st = StyleSheet.create({
   haloWrap: { alignItems: 'center', justifyContent: 'center' },
   halo: { position: 'absolute', borderRadius: 999 },
   halo1: { width: S.micSize * 1.32, height: S.micSize * 1.32, backgroundColor: 'rgba(0,122,255,0.10)' },
-  halo2: { width: S.micSize * 1.68, height: S.micSize * 1.68, backgroundColor: 'rgba(0,122,255,0.06)' },
   micBtn: {
     width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
     backgroundColor: C.accFill,
