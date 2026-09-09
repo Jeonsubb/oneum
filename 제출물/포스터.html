@@ -8,223 +8,186 @@
   @font-face { font-family: 'KoddiUD'; font-weight: 700; src: url('../oneum/mobile/assets/fonts/KoddiUDOnGothic-Bold.ttf') format('truetype'); }
   @font-face { font-family: 'KoddiUD'; font-weight: 800; src: url('../oneum/mobile/assets/fonts/KoddiUDOnGothic-ExtraBold.ttf') format('truetype'); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'KoddiUD', sans-serif; color: #191B1E; width: 1240px; background: #EDF0FB; }
+  body { font-family: 'KoddiUD', sans-serif; color: #17191C; width: 1240px; background: #fff; }
   .poster { width: 1240px; overflow: hidden; }
 
-  /* ── 헤더 ── */
-  .hero { position: relative; background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 55%, #4E7DF5 100%); color: #fff; padding: 56px 64px 40px; }
-  .hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 90px;
-    background: #EDF0FB; clip-path: polygon(0 100%, 100% 100%, 100% 30%, 38% 100%, 0 45%); }
-  .logo-row { display: flex; align-items: center; gap: 20px; }
-  .logo-mark { width: 74px; height: 74px; border-radius: 20px; background: #fff; display: flex; align-items: center; justify-content: center; }
-  .logo-mark svg { width: 44px; height: 44px; }
-  .logo-tx { font-size: 64px; font-weight: 800; letter-spacing: 2px; }
-  .tagline { font-size: 20px; margin-top: 14px; font-weight: 700; opacity: .95; width: 560px; line-height: 1.5; word-break: keep-all; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 30px; width: 600px; }
-  .hero-sec .k { font-size: 12px; letter-spacing: 2px; opacity: .7; font-weight: 700; }
-  .hero-sec h3 { font-size: 18px; font-weight: 800; margin: 4px 0 8px; }
-  .hero-sec p { font-size: 12.5px; line-height: 1.7; opacity: .93; }
-  .struct { margin-top: 24px; width: 620px; }
-  .struct .k { font-size: 12px; letter-spacing: 2px; opacity: .7; font-weight: 700; }
-  .flow { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-  .flow .step { background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.45); border-radius: 12px; padding: 8px 10px; font-size: 11px; font-weight: 700; line-height: 1.45; }
-  .flow .step b { display: block; font-size: 13px; font-weight: 800; }
-  .flow .arr { font-size: 16px; font-weight: 800; opacity: .8; }
-  /* 헤더 폰 2대 */
-  .hero-phones { position: absolute; right: 52px; top: 48px; display: flex; gap: 22px; z-index: 2; }
-  .phone { background: #fff; border-radius: 34px; padding: 10px; box-shadow: 0 22px 44px rgba(10,25,80,.35); }
-  .phone img { display: block; border-radius: 24px; }
-  .hero-phones .phone:nth-child(1) { transform: rotate(-3deg) translateY(16px); }
-  .hero-phones .phone:nth-child(2) { transform: rotate(2.5deg); }
-  .hero-phones .phone img { width: 205px; }
+  /* ─── 히어로: 딥블루 + 파동 + 폰 3대 ─── */
+  .hero {
+    position: relative; overflow: hidden; color: #fff; text-align: center;
+    background: linear-gradient(175deg, #0A3FA8 0%, #0A6CFF 62%, #4D9BFF 100%);
+    padding: 88px 60px 0;
+  }
+  /* 온음의 halo — 소리가 번지는 동심원 */
+  .rings { position: absolute; left: 50%; top: 430px; transform: translateX(-50%); pointer-events: none; }
+  .ring { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,.20); }
+  .r1 { width: 760px; height: 760px; }
+  .r2 { width: 1040px; height: 1040px; border-color: rgba(255,255,255,.12); }
+  .r3 { width: 1340px; height: 1340px; border-color: rgba(255,255,255,.07); }
 
-  /* ── 본문 공통 ── */
-  .body { padding: 40px 64px 30px; }
-  .fn { background: #fff; border-radius: 22px; padding: 30px 34px; margin-bottom: 26px; box-shadow: 0 6px 18px rgba(30,50,120,.07); }
-  .fn .k { font-size: 12px; letter-spacing: 2px; color: #2563EB; font-weight: 800; }
-  .fn h2 { font-size: 25px; font-weight: 800; margin: 5px 0 16px; display: flex; align-items: center; gap: 10px; }
-  .fn h2 .num { width: 30px; height: 30px; border-radius: 8px; background: #2563EB; color: #fff; font-size: 17px; display: inline-flex; align-items: center; justify-content: center; }
-  .cols { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; }
-  .shots-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .shots-row.three { grid-template-columns: repeat(3, 1fr); }
-  .shot .ph { background: #fff; border: 1.5px solid #D6DAE3; border-radius: 20px; padding: 6px; box-shadow: 0 6px 14px rgba(30,50,120,.10); }
-  .shot img { width: 100%; display: block; border-radius: 14px; }
-  .shot .cap { text-align: center; font-size: 11.5px; font-weight: 700; color: #43474D; margin-top: 8px; line-height: 1.45; }
-  .pill-label { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 999px; margin-bottom: 8px; }
-  .prob .pill-label { background: #FBEFDC; color: #7A4100; }
-  .sol .pill-label { background: #E3EBFF; color: #1D4ED8; }
-  .prob p, .sol p, .proc li { font-size: 13px; line-height: 1.7; color: #2B2F36; }
-  .prob, .sol { margin-bottom: 16px; }
-  .proc ol { padding-left: 18px; }
-  .proc li { margin-bottom: 4px; }
+  .brand { display: inline-flex; align-items: center; gap: 14px; }
+  .brand .mark { width: 58px; height: 58px; border-radius: 16px; background: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .brand .mark svg { width: 34px; height: 34px; }
+  .brand .name { font-size: 46px; font-weight: 800; letter-spacing: 3px; }
+  .hero h1 { font-size: 58px; font-weight: 800; line-height: 1.32; margin-top: 46px; letter-spacing: -1px; }
+  .hero .sub { font-size: 20px; font-weight: 700; opacity: .88; margin-top: 20px; line-height: 1.7; }
 
-  /* 서브 2단 */
-  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
-  .sub-grid .shots-row { grid-template-columns: repeat(2, 1fr); }
+  .hero-phones { position: relative; margin-top: 60px; height: 560px; }
+  .hp { position: absolute; background: #0b0b0d; border-radius: 38px; padding: 9px;
+    box-shadow: 0 30px 60px rgba(3,20,60,.45); }
+  .hp img { display: block; border-radius: 30px; }
+  .hp.center { left: 50%; transform: translateX(-50%); width: 300px; z-index: 3; }
+  .hp.center img { width: 282px; }
+  .hp.left  { left: 205px; top: 84px; width: 250px; transform: rotate(-5deg); opacity: .94; z-index: 2; }
+  .hp.right { right: 205px; top: 84px; width: 250px; transform: rotate(5deg); opacity: .94; z-index: 2; }
+  .hp.left img, .hp.right img { width: 232px; }
+  .hero-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 210px; z-index: 4;
+    background: linear-gradient(transparent, #fff); }
 
-  /* 기타 기능 */
-  .others { background: #fff; border-radius: 22px; padding: 26px 34px 30px; box-shadow: 0 6px 18px rgba(30,50,120,.07); }
-  .others h2 { font-size: 20px; font-weight: 800; margin-bottom: 14px; }
-  .cap-row { display: flex; flex-wrap: wrap; gap: 10px; }
-  .capsule { border: 1.8px solid #2563EB; color: #1D4ED8; font-size: 13.5px; font-weight: 800; border-radius: 999px; padding: 8px 18px; background: #F4F6FF; }
-  .capsule.ghost { border-color: #C3C6CC; color: #43474D; background: #fff; font-weight: 700; }
+  /* ─── 스탯 ─── */
+  .stats { display: flex; justify-content: center; gap: 100px; padding: 46px 60px 20px; text-align: center; }
+  .stat b { display: block; font-size: 54px; font-weight: 800; color: #0A5BE0; letter-spacing: -1px; }
+  .stat span { display: block; font-size: 15px; font-weight: 700; color: #6C7076; margin-top: 8px; line-height: 1.55; }
 
-  /* 푸터 배지 */
-  .foot { display: flex; gap: 14px; padding: 0 64px 46px; }
-  .badge { flex: 1; background: #1D4ED8; color: #fff; border-radius: 16px; padding: 16px 20px; }
-  .badge b { display: block; font-size: 19px; font-weight: 800; }
-  .badge span { font-size: 12px; opacity: .85; line-height: 1.5; display: block; margin-top: 3px; }
+  .divider { width: 64px; height: 5px; border-radius: 3px; background: #0A6CFF; margin: 60px auto 0; }
+  .sec-title { text-align: center; font-size: 38px; font-weight: 800; margin-top: 22px; letter-spacing: -0.5px; }
+  .sec-sub { text-align: center; font-size: 17px; font-weight: 700; color: #6C7076; margin-top: 12px; line-height: 1.7; }
+
+  /* ─── 3단계 ─── */
+  .steps { display: flex; gap: 34px; padding: 48px 90px 10px; }
+  .step { flex: 1; text-align: center; }
+  .step .ph { background: #0b0b0d; border-radius: 32px; padding: 8px; display: inline-block;
+    box-shadow: 0 16px 36px rgba(20,40,90,.16); }
+  .step .ph img { width: 235px; display: block; border-radius: 25px; }
+  .step .no { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+    border-radius: 999px; background: #0A6CFF; color: #fff; font-size: 17px; font-weight: 800; margin-top: 26px; }
+  .step h3 { font-size: 22px; font-weight: 800; margin-top: 12px; }
+  .step p { font-size: 14.5px; font-weight: 700; color: #6C7076; line-height: 1.65; margin-top: 8px; padding: 0 8px; }
+
+  /* ─── 기능 카드 2열 ─── */
+  .feats { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; padding: 50px 90px 0; }
+  .feat { display: flex; gap: 22px; align-items: center; background: #F4F6FA; border-radius: 26px; padding: 26px; }
+  .feat .ph { background: #0b0b0d; border-radius: 22px; padding: 6px; flex-shrink: 0; }
+  .feat .ph img { width: 150px; display: block; border-radius: 17px; }
+  .feat h3 { font-size: 21px; font-weight: 800; line-height: 1.35; }
+  .feat h3 em { font-style: normal; color: #0A5BE0; }
+  .feat p { font-size: 14px; font-weight: 700; color: #6C7076; line-height: 1.65; margin-top: 9px; }
+
+  /* ─── 원칙 스트립 ─── */
+  .principle {
+    margin: 60px 90px 0; border-radius: 28px; color: #fff; text-align: center;
+    background: linear-gradient(120deg, #0A3FA8, #0A6CFF); padding: 44px 60px;
+  }
+  .principle h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.45; }
+  .principle p { font-size: 16px; font-weight: 700; opacity: .88; margin-top: 12px; line-height: 1.7; }
+
+  /* ─── 푸터 ─── */
+  .foot { display: flex; align-items: center; justify-content: space-between; padding: 40px 90px 44px; }
+  .foot .l { font-size: 20px; font-weight: 800; color: #0A5BE0; letter-spacing: 1px; }
+  .foot .r { font-size: 13.5px; font-weight: 700; color: #9AA0A8; text-align: right; line-height: 1.6; }
 </style>
 </head>
 <body>
 <div class="poster">
 
-  <!-- ═══ 헤더 ═══ -->
+  <!-- 히어로 -->
   <div class="hero">
-    <div class="hero-phones">
-      <div class="phone"><img src="캡처/home.png"></div>
-      <div class="phone"><img src="캡처/deliver.png"></div>
-    </div>
-
-    <div class="logo-row">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="rings"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div></div>
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0A6CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2.5a3.5 3.5 0 0 1 3.5 3.5v6a3.5 3.5 0 0 1-7 0V6A3.5 3.5 0 0 1 12 2.5z"/>
           <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3.5"/><path d="M8.5 21.5h7"/>
         </svg>
       </div>
-      <div class="logo-tx">온음</div>
+      <div class="name">온음</div>
     </div>
-    <div class="tagline">내 말은 내가 확정한다. 구음장애인을 위한 의도 확인형 의사소통 보조, 온음</div>
+    <h1>발음이 뭉개져도,<br>내 말은 내가 확정한다</h1>
+    <div class="sub">구음장애인을 위한 의도 확인형 의사소통 보조<br>AI는 후보를 내고, 확정은 언제나 사용자가 합니다</div>
+    <div class="hero-phones">
+      <div class="hp left"><img src="캡처/confirmChoice.png"></div>
+      <div class="hp right"><img src="캡처/deliver.png"></div>
+      <div class="hp center"><img src="캡처/home.png"></div>
+      <div class="hero-fade"></div>
+    </div>
+  </div>
 
-    <div class="hero-grid">
-      <div class="hero-sec">
-        <div class="k">BACKGROUND · 개발 배경</div>
-        <p>구음장애인은 인지·언어 능력이 온전해도 발음 때문에 "말할 수 없는 사람"이 됩니다.
-        일반 음성인식은 구음장애 발화에서 절반 가까이 틀리고(실측 글자 오류율 42.9%),
-        틀린 문장을 확신 있게 출력합니다. 쓸 수 있는 한국어 서비스는 아직 없습니다.</p>
-      </div>
-      <div class="hero-sec">
-        <div class="k">GOAL · 서비스 목표</div>
-        <p>AI가 말을 대신 만들지 않습니다. 구음장애 데이터로 파인튜닝한 인식 모델이 후보를 내고,
-        사용자가 <b>직접 확정한 문장만</b> 큰 글자와 명료한 음성으로 전달합니다.
-        확정 전에는 어떤 소리도 나지 않습니다.</p>
+  <!-- 스탯 -->
+  <div class="stats">
+    <div class="stat"><b>42.9→18.7%</b><span>구음장애 발화 글자 오류율<br>AI Hub 데이터 파인튜닝 실측</span></div>
+    <div class="stat"><b>8년간 0팀</b><span>D-Tech 수상작 80팀 중<br>구음장애 의사소통을 다룬 팀</span></div>
+    <div class="stat"><b>실기기 동작</b><span>인식→확정→발화 전 흐름이<br>iPhone에서 작동하는 프로토타입</span></div>
+  </div>
+
+  <!-- 3단계 -->
+  <div class="divider"></div>
+  <div class="sec-title">온음이 말을 전하는 방법</div>
+  <div class="sec-sub">확정 게이트를 지나지 않은 문장은, 어떤 경우에도 소리 나지 않습니다</div>
+  <div class="steps">
+    <div class="step">
+      <div class="ph"><img src="캡처/home.png"></div>
+      <div class="no">1</div>
+      <h3>상황을 고르고 말한다</h3>
+      <p>파인튜닝 인식 모델과 범용 엔진이 동시에 듣고, 등록해 둔 내 표현과 대조해 후보를 나에게 맞춥니다.</p>
+    </div>
+    <div class="step">
+      <div class="ph"><img src="캡처/confirmChoice.png"></div>
+      <div class="no">2</div>
+      <h3>후보에서 내 말을 고른다</h3>
+      <p>불확실하면 후보 2~3개를 나열하고 숨기지 않습니다. AI가 복원한 문장에는 "제안" 표식이 붙습니다.</p>
+    </div>
+    <div class="step">
+      <div class="ph"><img src="캡처/deliver.png"></div>
+      <div class="no">3</div>
+      <h3>확정한 문장만 전한다</h3>
+      <p>큰 글자와 명료한 음성으로 전달됩니다. 문장을 누르면 상대에게 화면 가득 보여줄 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- 기능 카드 -->
+  <div class="divider"></div>
+  <div class="sec-title">안전과 속도를 잇는 장치들</div>
+  <div class="feats">
+    <div class="feat">
+      <div class="ph"><img src="캡처/practiceResult.png"></div>
+      <div>
+        <h3>연습이 곧 등록,<br><em>연습하면 빨라진다</em></h3>
+        <p>연습에서 인식이 검증된 문장만 "빠른 발화"로 등록할 수 있습니다. 등록 문장은 6중 안전 조건 아래 확인 없이 즉시 재생됩니다. 점수도 등급도 없습니다.</p>
       </div>
     </div>
-
-    <div class="struct">
-      <div class="k">STRUCTURE · 서비스 구조</div>
-      <div class="flow">
-        <div class="step"><b>① 앙상블 인식</b>파인튜닝 Whisper + 범용 STT 동시 호출</div>
-        <div class="arr">→</div>
-        <div class="step"><b>② 개인화 재정렬</b>등록 표현·교정 이력으로 후보 맞춤</div>
-        <div class="arr">→</div>
-        <div class="step"><b>③ 확정 게이트</b>사용자가 고른 문장만 음성으로</div>
+    <div class="feat">
+      <div class="ph"><img src="캡처/aiChat.png"></div>
+      <div>
+        <h3>AI 상대와<br><em>실전처럼 대화 연습</em></h3>
+        <p>병원 접수·카페 주문 같은 실제 상황을 AI 상대역과 주고받습니다. 말하면 전사되고, AI가 음성으로 응답합니다. 연습 전용 공간이라 밖으로 전달되지 않습니다.</p>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="ph"><img src="캡처/consent.png"></div>
+      <div>
+        <h3>내 데이터는<br><em>내 휴대폰 안에만</em></h3>
+        <p>등록 문장·교정 이력은 기기 안에 저장되고, 음성이 어디로 가는지 홈 화면에 늘 표시됩니다. 연습 녹음의 용도는 항목별로 따로 동의를 받습니다.</p>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="ph"><img src="캡처/onboard.png"></div>
+      <div>
+        <h3>녹음 훈련 없이<br><em>바로 시작</em></h3>
+        <p>해외 서비스의 500문장 녹음 훈련 대신, 자주 쓰는 문장을 골라 담는 것으로 시작합니다. 쓸수록 교정 이력이 쌓여 후보가 나에게 맞춰집니다.</p>
       </div>
     </div>
   </div>
 
-  <!-- ═══ 본문 ═══ -->
-  <div class="body">
-
-    <!-- MAIN 1 -->
-    <div class="fn">
-      <div class="k">MAIN FUNCTION 1</div>
-      <h2><span class="num">1</span>후보 확정형 말하기: 오인식을 사용자가 통제한다</h2>
-      <div class="cols">
-        <div class="shots-row">
-          <div class="shot"><div class="ph"><img src="캡처/home.png"></div><div class="cap">상황 선택 후 눌러서 말하기</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/confirmChoice.png"></div><div class="cap">후보 2~3개 + "이 중에 없어요"</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/edit.png"></div><div class="cap">필요한 만큼만 고치기</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/deliver.png"></div><div class="cap">확정한 문장만 크게 + 음성</div></div>
-        </div>
-        <div>
-          <div class="prob"><span class="pill-label">PROBLEM</span>
-            <p>일반 음성인식은 틀린 문장을 확신 있게 출력해, 사용자의 의도와 다른 말이 그 사람의 말로 전달될 수 있습니다.</p>
-          </div>
-          <div class="sol"><span class="pill-label">SOLUTION</span>
-            <p>확실하면 1개, 불확실하면 후보 2~3개를 나열하고 불확실성을 숨기지 않습니다.
-            저신뢰 구간에서는 LLM이 의도 후보를 복원하되 반드시 "제안" 표식을 달고 같은 게이트를 거칩니다.
-            2회 실패하면 재발화를 더 권하지 않고 직접 입력을 앞세웁니다. 어떤 경우에도 대화가 끊기지 않습니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAIN 2 -->
-    <div class="fn">
-      <div class="k">MAIN FUNCTION 2</div>
-      <h2><span class="num">2</span>연습이 곧 등록: 안전과 속도가 연습으로 연결된다</h2>
-      <div class="cols">
-        <div class="shots-row">
-          <div class="shot"><div class="ph"><img src="캡처/practiceHome.png"></div><div class="cap">상황 연습·읽기 연습 (점수 없음)</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/practiceRun.png"></div><div class="cap">문장당 3회, 마지막은 평소처럼</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/practiceResult.png"></div><div class="cap">통과 문장을 명시적으로 등록</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/quickPreview.png"></div><div class="cap">빠른 발화: 0.5초 미리보기</div></div>
-        </div>
-        <div>
-          <div class="prob"><span class="pill-label">PROBLEM</span>
-            <p>매번 확인을 거치면 안전하지만 느립니다. 자주 쓰는 말까지 확인을 요구하면 대화의 흐름을 놓칩니다.</p>
-          </div>
-          <div class="sol"><span class="pill-label">SOLUTION</span>
-            <p>일상적인 조음 연습에 얹어, 연습에서 인식이 검증된 저위험 문장만 사용자가 "빠른 발화"로 등록합니다.
-            등록 문장은 6중 안전 조건 아래 즉시 재생되며, 재생 직전 0.5초·재생 후 3초의 취소권이 있습니다.
-            확인 없이 말할 자격은 사용자가 연습으로 직접 만듭니다. 진행성 질환을 배려해 점수·등급은 어디에도 없습니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUB 1 + SUB 2 -->
-    <div class="sub-grid">
-      <div class="fn" style="margin-bottom:0;">
-        <div class="k">SUB FUNCTION 1</div>
-        <h2 style="font-size:21px;">AI와 실전처럼 대화 연습</h2>
-        <div class="shots-row">
-          <div class="shot"><div class="ph"><img src="캡처/chatHome.png"></div><div class="cap">병원 접수·카페 주문 시나리오</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/aiChat.png"></div><div class="cap">말하면 전사되고 AI가 음성으로 응답</div></div>
-        </div>
-        <p style="font-size:13px; line-height:1.7; color:#2B2F36; margin-top:14px;">
-          AI 상대역(접수처 직원·점원)과 실제 상황을 주고받으며 말하기를 연습합니다.
-          연습 전용 공간이라 여기서 나눈 말이 밖으로 전달되는 일은 없습니다.</p>
-      </div>
-      <div class="fn" style="margin-bottom:0;">
-        <div class="k">SUB FUNCTION 2</div>
-        <h2 style="font-size:21px;">녹음 훈련 없는 개인화 · 분리 동의</h2>
-        <div class="shots-row">
-          <div class="shot"><div class="ph"><img src="캡처/onboard.png"></div><div class="cap">자주 쓰는 문장을 골라 담기만</div></div>
-          <div class="shot"><div class="ph"><img src="캡처/consent.png"></div><div class="cap">연습 녹음 용도별 분리 동의</div></div>
-        </div>
-        <p style="font-size:13px; line-height:1.7; color:#2B2F36; margin-top:14px;">
-          500문장 녹음 훈련(해외 방식) 대신, 녹음 없이 문장을 담는 것으로 시작합니다.
-          쓰면서 쌓이는 교정 이력이 후보 순위를 그 사람에게 맞춥니다. 개인 데이터는 기기 안에만 저장됩니다.</p>
-      </div>
-    </div>
-
-    <!-- 기타 기능 -->
-    <div class="others" style="margin-top:26px;">
-      <h2>OTHER · 이외 세부 기능</h2>
-      <div class="cap-row">
-        <span class="capsule">2-엔진 앙상블 인식</span>
-        <span class="capsule">LLM 의도 복원 "제안"</span>
-        <span class="capsule">빠른 발화 6중 안전 조건</span>
-        <span class="capsule">취소·강등 기록 열람</span>
-        <span class="capsule ghost">KoddiUD 온고딕 (유니버설 디자인 서체)</span>
-        <span class="capsule ghost">주 터치 타깃 64pt+</span>
-        <span class="capsule ghost">듣기 시작·끝 효과음</span>
-        <span class="capsule ghost">목소리 크기 반응 파동</span>
-        <span class="capsule ghost">개인 데이터 기기 내 저장</span>
-        <span class="capsule ghost">음성 전송처 상시 고지</span>
-        <span class="capsule ghost">블루투스 스피커로 "내 몸에서 나는 목소리"</span>
-      </div>
-    </div>
+  <!-- 원칙 -->
+  <div class="principle">
+    <h2>"AI가 장애인의 말을 대신 만들어 주는 방향이 아니라,<br>AI가 후보를 내고 당사자가 확정하는 방향"</h2>
+    <p>보조기술에서 당사자 통제권의 설계 표준을 제안합니다</p>
   </div>
 
-  <!-- 푸터 배지 -->
   <div class="foot">
-    <div class="badge"><b>CER 42.9% → 18.7%</b><span>AI Hub 구음장애 데이터 파인튜닝 실측<br>(검증 전 내부 실측값)</span></div>
-    <div class="badge"><b>실기기 iOS 동작</b><span>인식→확정→발화 전 흐름이<br>실제 폰에서 작동하는 프로토타입</span></div>
-    <div class="badge"><b>8년간 0팀</b><span>D-Tech 1~8회 수상작 80팀 중<br>구음장애 의사소통을 다룬 팀 없음</span></div>
+    <div class="l">온음 Oneum</div>
+    <div class="r">D-Tech 공모전 Track 1 · 팀 온음<br>KoddiUD 온고딕 · 실기기 화면 수록</div>
   </div>
 
 </div>
