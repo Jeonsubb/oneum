@@ -31,9 +31,9 @@ export function LandingScreen({ onDone }: { onDone: () => void }) {
   const veil = useRef(new Animated.Value(1)).current   // 전체 페이드아웃
   useEffect(() => {
     Animated.sequence([
-      Animated.timing(rise, { toValue: 1, duration: 550, useNativeDriver: true }),
-      Animated.delay(1400),
-      Animated.timing(veil, { toValue: 0, duration: 420, useNativeDriver: true }),
+      Animated.timing(rise, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.delay(2200),
+      Animated.timing(veil, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start(() => onDone())
   }, [rise, veil, onDone])
   return (
