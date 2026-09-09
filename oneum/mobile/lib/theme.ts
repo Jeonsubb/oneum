@@ -28,11 +28,12 @@ export type Colors = {
 }
 
 const PALETTES: Record<Palette, Colors> = {
-  // 쨍한 파랑 + 옅은 라벤더 배경(#F4F4FF). 채움이 진하므로 채움 위 글자(onAcc)는 흰색.
+  // iOS 시스템 디자인 언어 — 설정 앱과 같은 그룹 배경(#F2F2F7) 위에 흰 카드,
+  // 강조는 시스템 블루(#007AFF). 채움이 진하므로 채움 위 글자(onAcc)는 흰색.
   blue: {
-    ink: '#191B1E', sub: '#43474D', line: '#C3C6CC', soft: '#ECECF6',
-    acc: '#1D5DEC', accTint: '#E3EBFF', accFill: '#2563EB', onAcc: '#FFFFFF', accEdge: '#1D4ED8',
-    warn: '#7A4100', warnBg: '#FAEEDC', accShadow: 'rgba(37,99,235,.35)', bg: '#F4F4FF',
+    ink: '#1C1C1E', sub: '#6D6D72', line: '#E5E5EA', soft: '#E9E9EB',
+    acc: '#007AFF', accTint: '#E9F2FF', accFill: '#007AFF', onAcc: '#FFFFFF', accEdge: '#007AFF',
+    warn: '#D70015', warnBg: '#FFEBEA', accShadow: 'rgba(0,122,255,.30)', bg: '#F2F2F7',
   },
   green: {
     ink: '#171A18', sub: '#414945', line: '#C1C8C3', soft: '#F0F4F1',

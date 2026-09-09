@@ -367,9 +367,11 @@ const st = StyleSheet.create({
   },
 
   candSingle: {
-    marginTop: 22, borderWidth: 2.5, borderColor: C.acc, borderRadius: 20,
+    marginTop: 22, borderWidth: 1.5, borderColor: C.acc, borderRadius: 18,
     paddingVertical: 34, paddingHorizontal: 26, minHeight: S.candSingleMin,
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   candSingleTx: {
     fontSize: S.candSingleFont, fontWeight: W.extra, lineHeight: S.candSingleFont * 1.5,
@@ -399,7 +401,7 @@ const st = StyleSheet.create({
 
   sayRow: { flexDirection: 'row', gap: 14, alignItems: 'stretch' },
   devBox: {
-    width: 124, borderWidth: 1.5, borderColor: C.line, borderRadius: 16, backgroundColor: C.soft,
+    width: 124, borderRadius: 16, backgroundColor: C.soft,
     alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 10, paddingHorizontal: 6,
   },
   devSmall: { fontSize: 13, fontWeight: W.bold, color: C.sub },

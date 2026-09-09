@@ -131,7 +131,7 @@ const st = StyleSheet.create({
 
   editHint: { fontSize: 16, color: C.sub, marginTop: 12 },
   editField: {
-    marginTop: 18, borderWidth: 2.5, borderColor: C.acc, borderRadius: 18,
+    marginTop: 18, borderWidth: 1.5, borderColor: C.acc, borderRadius: 16,
     paddingVertical: 22, paddingHorizontal: 20, minHeight: 150,
     fontSize: 26, fontWeight: W.bold, lineHeight: 26 * 1.55, color: C.ink,
     backgroundColor: '#fff', textAlignVertical: 'top',
@@ -151,7 +151,7 @@ const st = StyleSheet.create({
 
   notice: {
     flexDirection: 'row', gap: 14, alignItems: 'flex-start', backgroundColor: C.accTint,
-    borderWidth: 2, borderColor: C.acc, borderRadius: 18, padding: 18, marginTop: 20,
+    borderWidth: 1.5, borderColor: C.acc, borderRadius: 16, padding: 18, marginTop: 20,
   },
   noticeB: { fontSize: 18, fontWeight: W.extra, lineHeight: 26, color: C.ink },
   noticeS: { fontSize: 15, color: C.sub, marginTop: 4, lineHeight: 22 },

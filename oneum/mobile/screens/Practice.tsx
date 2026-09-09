@@ -477,7 +477,9 @@ const st = StyleSheet.create({
   consentLead: { fontSize: 17, color: C.sub, marginTop: 14, lineHeight: 26 },
   consentCard: {
     flexDirection: 'row', gap: 14, alignItems: 'flex-start',
-    borderWidth: 2, borderColor: C.line, borderRadius: 16, padding: 16, backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: 'transparent', borderRadius: 16, padding: 16, backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   checkbox: {
     width: 32, height: 32, borderRadius: 8, borderWidth: 2, borderColor: C.line,
@@ -488,12 +490,12 @@ const st = StyleSheet.create({
 
   bubble: { maxWidth: '86%', borderRadius: 18, paddingVertical: 12, paddingHorizontal: 16 },
   bubbleAi: {
-    alignSelf: 'flex-start', backgroundColor: '#fff',
-    borderWidth: 2, borderColor: C.line, borderTopLeftRadius: 6,
+    alignSelf: 'flex-start', backgroundColor: '#fff', borderTopLeftRadius: 6,
+    shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   bubbleMe: {
-    alignSelf: 'flex-end', backgroundColor: C.accFill,
-    borderWidth: 2, borderColor: C.accEdge, borderTopRightRadius: 6,
+    alignSelf: 'flex-end', backgroundColor: C.accFill, borderTopRightRadius: 6,
   },
   bubbleHead: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
   bubbleWho: { fontSize: 13, fontWeight: W.extra, color: C.acc },
@@ -504,18 +506,25 @@ const st = StyleSheet.create({
   sectionHead: { fontSize: 20, fontWeight: W.extra, color: C.ink, marginTop: 4 },
   sectionSub: { fontSize: 14.5, color: C.sub, lineHeight: 21, marginBottom: 4, marginTop: 10 },
 
+  // iOS 세그먼트 컨트롤 방식 — 회색 홈 안에서 선택된 칸만 흰색으로 떠오른다
   segBar: {
-    flexDirection: 'row', gap: 8, marginTop: 14, padding: 5,
-    backgroundColor: C.soft, borderRadius: 16, borderWidth: 1.5, borderColor: C.line,
+    flexDirection: 'row', gap: 4, marginTop: 14, padding: 4,
+    backgroundColor: C.soft, borderRadius: 14,
   },
-  segBtn: { flex: 1, minHeight: 54, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  segBtnOn: { backgroundColor: C.accFill, borderWidth: 1.5, borderColor: C.accEdge },
+  segBtn: { flex: 1, minHeight: 52, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  segBtnOn: {
+    backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
+  },
   segTx: { fontSize: 18, fontWeight: W.bold, color: C.sub },
-  segTxOn: { color: C.onAcc, fontWeight: W.extra },
+  segTxOn: { color: C.ink, fontWeight: W.extra },
   readOk: { fontSize: 18, fontWeight: W.bold, color: C.acc, textAlign: 'center' },
   setCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    borderWidth: 2, borderColor: C.line, borderRadius: 16, padding: 16, backgroundColor: '#fff',
+    borderRadius: 16, padding: 16, backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   setName: { fontSize: 20, fontWeight: W.extra, color: C.ink },
   draftTag: {
@@ -530,7 +539,7 @@ const st = StyleSheet.create({
   roundDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: C.line, backgroundColor: '#fff' },
   roundTx: { fontSize: 15, fontWeight: W.bold, color: C.sub, marginLeft: 6 },
   sentenceBox: {
-    marginTop: 18, borderWidth: 2.5, borderColor: C.acc, borderRadius: 20,
+    marginTop: 18, borderWidth: 1.5, borderColor: C.acc, borderRadius: 18,
     paddingVertical: 30, paddingHorizontal: 24, minHeight: 170,
     alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff',
   },
@@ -546,7 +555,9 @@ const st = StyleSheet.create({
   targetTx: { fontSize: 22, fontWeight: W.extra, color: C.ink, marginTop: 6, lineHeight: 31 },
   heardRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    borderWidth: 2, borderColor: C.line, borderRadius: 14, padding: 14, backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: 'transparent', borderRadius: 14, padding: 14, backgroundColor: '#fff',
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   heardIdx: { fontSize: 14, fontWeight: W.bold, color: C.sub, width: 58 },
   heardTx: { flex: 1, fontSize: 19, fontWeight: W.bold, color: C.ink, lineHeight: 27 },

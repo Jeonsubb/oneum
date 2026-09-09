@@ -80,11 +80,10 @@ export function Btn({ label, onPress, variant = 'primary', icon, xl, style, disa
       disabled={disabled}
       style={[
         st.btn,
-        isPrimary && { backgroundColor: C.accFill, borderColor: C.accEdge },
-        // 주 버튼에만 옅은 그림자 — "이걸 누르면 된다"는 위계를 색과 깊이로 함께 전달(토스식)
-        isPrimary && !disabled && st.btnShadow,
-        variant === 'outline' && { backgroundColor: '#fff', borderColor: '#75787D' },
-        isTonal && { backgroundColor: C.soft, borderColor: C.line, minHeight: S.btnTonalMin },
+        // iOS 버튼은 테두리 없이 채움색으로만 위계를 만든다 (filled / gray / bordered)
+        isPrimary && { backgroundColor: C.accFill },
+        variant === 'outline' && { backgroundColor: '#fff', borderWidth: 1, borderColor: '#C7C7CC' },
+        isTonal && { backgroundColor: C.soft, minHeight: S.btnTonalMin },
         xl && { minHeight: S.btnXlMin },
         disabled && { opacity: 0.45 },
         style,
@@ -154,8 +153,10 @@ export function AppBar({ title, onBack, right }: { title?: string; onBack?: () =
   return (
     <View style={st.appbar}>
       {onBack ? (
-        <Pressable onPress={onBack} style={st.backBtn} accessibilityRole="button" accessibilityLabel="뒤로">
-          <Icon name="back" size={20} color={C.sub} />
+        // iOS 내비게이션 바의 뒤로 버튼 — 테두리 없는 파란 텍스트 + 셰브런
+        <Pressable onPress={onBack} style={st.backBtn} accessibilityRole="button" accessibilityLabel="뒤로"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Icon name="back" size={20} color={C.acc} />
           <Text style={st.backTx}>뒤로</Text>
         </Pressable>
       ) : <View style={{ width: 76 }} />}
@@ -208,29 +209,25 @@ const st = StyleSheet.create({
 
   btn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
-    width: '100%', minHeight: S.btnMin, borderRadius: S.btnRadius, borderWidth: 2,
+    width: '100%', minHeight: S.btnMin, borderRadius: 16,
     paddingVertical: 12, paddingHorizontal: 18,
   },
   btnTx: { fontSize: S.btnFont, fontWeight: W.extra, textAlign: 'center' },
-  btnShadow: {
-    shadowColor: C.acc, shadowOpacity: 0.28, shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 }, elevation: 4,
-  },
 
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: S.chipMin,
-    paddingHorizontal: 24, borderRadius: 28, borderWidth: 2, borderColor: C.line, backgroundColor: '#fff',
+    paddingHorizontal: 24, borderRadius: 999, borderWidth: 1, borderColor: '#C7C7CC', backgroundColor: '#fff',
   },
-  chipTx: { fontSize: S.chipFont, fontWeight: W.bold, color: C.sub },
+  chipTx: { fontSize: S.chipFont, fontWeight: W.bold, color: C.ink },
 
-  // 후보 카드 — 굵은 테두리 대신 흰 카드 + 옅은 그림자로 배경에서 띄운다(토스식).
-  // 선택지라는 사실은 테두리 굵기가 아니라 카드의 부피감으로 전달한다.
+  // 후보 카드 — iOS 그룹 리스트처럼 테두리 없는 흰 카드. 그룹 배경(#F2F2F7)과의
+  // 대비만으로 구분되고, 그림자는 들릴 듯 말 듯한 수준만 남긴다(플랫).
   cand: {
     flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: S.candMin,
-    borderWidth: 1.5, borderColor: '#DDE0E8', borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 16, paddingRight: 14, paddingLeft: 22, backgroundColor: '#fff',
-    shadowColor: '#1B2B5C', shadowOpacity: 0.08, shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 }, elevation: 3,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   candTap: { flex: 1, justifyContent: 'center', minHeight: 60 },
   candTx: { fontSize: S.candFont, fontWeight: W.bold, lineHeight: S.candFont * 1.4, color: C.ink },
@@ -240,21 +237,22 @@ const st = StyleSheet.create({
   },
   suggestTagTx: { fontSize: 13, fontWeight: W.extra, color: C.acc },
   editBtn: {
-    width: 64, height: 64, borderRadius: 14, borderWidth: 1.5, borderColor: C.line,
+    width: 64, height: 64, borderRadius: 12,
     backgroundColor: C.soft, alignItems: 'center', justifyContent: 'center', gap: 2,
   },
   editTx: { fontSize: 13, fontWeight: W.bold, color: C.sub },
 
   appbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48 },
   backBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1.5, borderColor: C.line,
-    borderRadius: 12, paddingVertical: 10, paddingLeft: 8, paddingRight: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingVertical: 10, paddingRight: 14,
   },
-  backTx: { fontSize: 16, fontWeight: W.bold, color: C.sub },
+  backTx: { fontSize: 17, fontWeight: W.bold, color: C.acc },
   barTitle: { fontSize: 20, fontWeight: W.extra, color: C.ink },
 
+  // iOS 탭바 — 헤어라인 한 줄과 흰 배경만. 두꺼운 경계선을 쓰지 않는다.
   tabBar: {
-    flexDirection: 'row', borderTopWidth: 1.5, borderTopColor: C.line,
+    flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#B2B2B7',
     backgroundColor: '#fff', paddingTop: 8, paddingHorizontal: 8,
   },
   tab: {
