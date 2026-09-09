@@ -51,7 +51,6 @@ export function LandingScreen({ onDone }: { onDone: () => void }) {
           transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
         }}>
           <Wordmark height={76} color="#fff" />
-          <Text style={st.landingTag}>내 말은, 내가 확정한다</Text>
         </Animated.View>
       </LinearGradient>
     </Animated.View>
