@@ -3,9 +3,13 @@
 import { ReactNode, useEffect, useRef } from 'react'
 import { Animated, Easing, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import { BlurView } from 'expo-blur'
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon, IconName } from './Icon'
 import { palette, S, W } from '../lib/theme'
+
+/** iOS 26 리퀴드 글래스 사용 가능 여부 — 미만 버전·웹에서는 블러/단색으로 폴백한다. */
+export const GLASS = isLiquidGlassAvailable()
 
 export const C = palette('blue')
 
@@ -98,18 +102,32 @@ export function Btn({ label, onPress, variant = 'primary', icon, xl, style, disa
   )
 }
 
-/** 상황 칩 — 목업의 .chip. 자동 추정하지 않고 사용자가 직접 고른다(DD-06). */
+/** 상황 칩 — 목업의 .chip. 자동 추정하지 않고 사용자가 직접 고른다(DD-06).
+ *  iOS 26에서는 리퀴드 글래스 캡슐로 그려진다(선택 시 파랑 틴트). */
 export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPress?: () => void }) {
+  const inner = (
+    <>
+      {on && <Icon name="check" size={18} color={C.onAcc} />}
+      <Text style={[st.chipTx, on && { color: C.onAcc }]}>{label}</Text>
+    </>
+  )
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: !!on }}
       accessibilityLabel={`상황 ${label}${on ? ', 선택됨' : ''}`}
       onPress={onPress}
-      style={[st.chip, on && { backgroundColor: C.accFill, borderColor: C.accEdge }]}
     >
-      {on && <Icon name="check" size={18} color={C.onAcc} />}
-      <Text style={[st.chipTx, on && { color: C.onAcc }]}>{label}</Text>
+      {GLASS ? (
+        <GlassView glassEffectStyle="regular" isInteractive tintColor={on ? C.acc : undefined}
+          style={st.chipGlass}>
+          {inner}
+        </GlassView>
+      ) : (
+        <View style={[st.chip, on && { backgroundColor: C.accFill, borderColor: C.accEdge }]}>
+          {inner}
+        </View>
+      )}
     </Pressable>
   )
 }
@@ -155,11 +173,20 @@ export function AppBar({ title, onBack, right }: { title?: string; onBack?: () =
   return (
     <View style={st.appbar}>
       {onBack ? (
-        // iOS 내비게이션 바의 뒤로 버튼 — 테두리 없는 파란 텍스트 + 셰브런
-        <Pressable onPress={onBack} style={st.backBtn} accessibilityRole="button" accessibilityLabel="뒤로"
+        // iOS 26 내비게이션의 뒤로 버튼 — 리퀴드 글래스 캡슐 (미지원 시 파란 텍스트)
+        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="뒤로"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Icon name="back" size={20} color={C.acc} />
-          <Text style={st.backTx}>뒤로</Text>
+          {GLASS ? (
+            <GlassView glassEffectStyle="regular" isInteractive style={st.backGlass}>
+              <Icon name="back" size={19} color={C.acc} />
+              <Text style={st.backTx}>뒤로</Text>
+            </GlassView>
+          ) : (
+            <View style={st.backBtn}>
+              <Icon name="back" size={20} color={C.acc} />
+              <Text style={st.backTx}>뒤로</Text>
+            </View>
+          )}
         </Pressable>
       ) : <View style={{ width: 76 }} />}
       {title ? <Text style={st.barTitle}>{title}</Text> : <View />}
@@ -182,29 +209,33 @@ const TAB_ITEMS: { key: TabKey; label: string; icon: IconName }[] = [
 ]
 
 /** 루트 화면 콘텐츠가 탭바에 가리지 않도록 확보해야 하는 하단 여백(세이프에어리어 제외). */
-export const TABBAR_CONTENT_HEIGHT = 62
+export const TABBAR_CONTENT_HEIGHT = 84
 
 export function TabBar({ active, onSelect }: { active: TabKey; onSelect: (k: TabKey) => void }) {
   const insets = useSafeAreaInsets()
-  return (
-    // iOS 네이티브 탭바 — 화면 맨 아래까지 내려가는 반투명 블러 재질(systemChromeMaterial풍).
-    // 홈 인디케이터 영역까지 재질이 이어지고, 위에는 헤어라인 한 줄만 긋는다.
-    <BlurView intensity={88} tint="extraLight"
-      style={[st.tabBar, { paddingBottom: Math.max(insets.bottom, 10) }]}
-      accessibilityRole="tablist">
-      {TAB_ITEMS.map(t => {
-        const on = t.key === active
-        return (
-          <Pressable key={t.key} onPress={() => onSelect(t.key)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
-            accessibilityLabel={`${t.label}${on ? ', 선택됨' : ''}`}
-            style={st.tab}>
-            <Icon name={t.icon} size={27} color={on ? C.acc : '#8E8E93'} />
-            <Text style={[st.tabTx, on && { color: C.acc, fontWeight: W.extra }]}>{t.label}</Text>
-          </Pressable>
-        )
-      })}
+  const items = TAB_ITEMS.map(t => {
+    const on = t.key === active
+    return (
+      <Pressable key={t.key} onPress={() => onSelect(t.key)}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: on }}
+        accessibilityLabel={`${t.label}${on ? ', 선택됨' : ''}`}
+        style={st.tab}>
+        <Icon name={t.icon} size={27} color={on ? C.acc : '#8E8E93'} />
+        <Text style={[st.tabTx, on && { color: C.acc, fontWeight: W.extra }]}>{t.label}</Text>
+      </Pressable>
+    )
+  })
+  // iOS 26 탭바 — 화면 위에 떠 있는 리퀴드 글래스 캡슐. 미지원 환경은 블러 캡슐로 폴백.
+  const bottom = Math.max(insets.bottom, 12)
+  return GLASS ? (
+    <GlassView glassEffectStyle="regular" style={[st.tabBar, { bottom }]} accessibilityRole="tablist">
+      {items}
+    </GlassView>
+  ) : (
+    <BlurView intensity={95} tint="extraLight"
+      style={[st.tabBar, st.tabBarFallback, { bottom }]} accessibilityRole="tablist">
+      {items}
     </BlurView>
   )
 }
@@ -257,19 +288,28 @@ const st = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingVertical: 10, paddingRight: 14,
   },
+  backGlass: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, overflow: 'hidden',
+    borderRadius: 999, paddingVertical: 9, paddingLeft: 10, paddingRight: 16,
+  },
   backTx: { fontSize: 17, fontWeight: W.bold, color: C.acc },
+
+  chipGlass: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: S.chipMin,
+    paddingHorizontal: 24, borderRadius: 999, overflow: 'hidden',
+  },
   barTitle: { fontSize: 20, fontWeight: W.extra, color: C.ink },
 
-  // iOS 탭바 — 화면 하단에 붙는 반투명 재질. 배경색은 블러 위에 얹는 흰 베일이다.
+  // iOS 26 탭바 — 좌우 여백을 두고 떠 있는 캡슐. 재질(글래스/블러)이 배경을 비춘다.
   tabBar: {
-    position: 'absolute', left: 0, right: 0, bottom: 0,
-    flexDirection: 'row', overflow: 'hidden',
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(0,0,0,0.22)',
-    backgroundColor: 'rgba(249,249,249,0.82)', paddingTop: 7, paddingHorizontal: 8,
+    position: 'absolute', left: 20, right: 20,
+    flexDirection: 'row', overflow: 'hidden', borderRadius: 999,
+    paddingVertical: 7, paddingHorizontal: 10,
   },
+  tabBarFallback: { backgroundColor: 'rgba(249,249,249,0.80)' },
   tab: {
     flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3,
-    minHeight: 52, paddingVertical: 2,
+    minHeight: 54, paddingVertical: 2, borderRadius: 999,
   },
   tabTx: { fontSize: 12, fontWeight: W.bold, color: '#8E8E93' },
 })

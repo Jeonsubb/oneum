@@ -11,8 +11,9 @@ import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useAudioRecorderState, type AudioRecorder } from 'expo-audio'
 import { Icon } from '../components/Icon'
 import { Wordmark } from '../components/Wordmark'
+import { GlassView } from 'expo-glass-effect'
 import {
-  AnimatedPressable, AppBar, Btn, C, Candidate, Chip, NoneOfThem, SilenceBadge, Spacer,
+  AnimatedPressable, AppBar, Btn, C, Candidate, Chip, GLASS, NoneOfThem, SilenceBadge, Spacer,
   layout, usePressScale,
 } from '../components/ui'
 import { S, W } from '../lib/theme'
@@ -74,7 +75,8 @@ export function HomeScreen({
 }
 
 /** 마이크 버튼 — 평상시 아주 느리게 숨쉬듯 커졌다 작아지고(눌러도 된다는 초대),
- *  누르면 눌린 만큼 줄었다가 스프링으로 복귀한다(Shazam식 촉감). */
+ *  누르면 눌린 만큼 줄었다가 스프링으로 복귀한다(Shazam식 촉감).
+ *  iOS 26에서는 파랑 틴트의 리퀴드 글래스 원 — 누를 때 시스템이 빛 반응을 더한다. */
 function MicButton({ onPress }: { onPress: () => void }) {
   const press = usePressScale(0.93)
   const breath = useRef(new Animated.Value(0)).current
@@ -87,14 +89,23 @@ function MicButton({ onPress }: { onPress: () => void }) {
     return () => loop.stop()
   }, [breath])
   const breathScale = breath.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] })
+  const inner = (
+    <>
+      <Icon name="mic" size={S.micIcon} color={C.onAcc} />
+      <Text style={st.micLabel}>눌러서 말하기</Text>
+    </>
+  )
   return (
     <Animated.View style={{ transform: [{ scale: breathScale }] }}>
       <AnimatedPressable onPress={onPress} accessibilityRole="button"
         accessibilityLabel="눌러서 말하기. 누르면 듣기 시작하고, 다 말한 뒤 한 번 더 누르면 됩니다"
         onPressIn={press.onPressIn} onPressOut={press.onPressOut}
-        style={[st.micBtn, { transform: [{ scale: press.scale }] }]}>
-        <Icon name="mic" size={S.micIcon} color={C.onAcc} />
-        <Text style={st.micLabel}>눌러서 말하기</Text>
+        style={[GLASS ? st.micWrapGlass : st.micBtn, { transform: [{ scale: press.scale }] }]}>
+        {GLASS ? (
+          <GlassView glassEffectStyle="regular" isInteractive tintColor={C.acc} style={st.micGlass}>
+            {inner}
+          </GlassView>
+        ) : inner}
       </AnimatedPressable>
     </Animated.View>
   )
@@ -352,9 +363,19 @@ const st = StyleSheet.create({
     width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
     backgroundColor: C.accFill,
     alignItems: 'center', justifyContent: 'center', gap: 10,
-    // 테두리 없이 그림자만으로 라벤더 배경에서 떠 보이게 한다 (참고 시안과 동일)
+    // 테두리 없이 그림자만으로 배경에서 떠 보이게 한다
     shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 }, elevation: 7,
+  },
+  // 리퀴드 글래스 버전 — 그림자는 바깥 래퍼에, 글래스 원은 안쪽에 (overflow가 그림자를 자르지 않게)
+  micWrapGlass: {
+    borderRadius: S.micSize / 2,
+    shadowColor: '#000', shadowOpacity: 0.16, shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  micGlass: {
+    width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2, overflow: 'hidden',
+    alignItems: 'center', justifyContent: 'center', gap: 10,
   },
   micLabel: { fontSize: S.micLabel, fontWeight: W.extra, color: C.onAcc },
 
