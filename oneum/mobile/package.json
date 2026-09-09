@@ -6,6 +6,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.15",
     "expo-audio": "~57.0.4",
+    "expo-blur": "~57.0.2",
     "expo-file-system": "~57.0.6",
     "expo-font": "~57.0.3",
     "expo-speech": "~57.0.1",

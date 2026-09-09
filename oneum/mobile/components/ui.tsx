@@ -2,6 +2,8 @@
  *  색상 버전은 파랑(딥블루 #14508C)으로 확정했다. theme.ts의 다른 팔레트는 남겨두되 쓰지 않는다. */
 import { ReactNode, useEffect, useRef } from 'react'
 import { Animated, Easing, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { BlurView } from 'expo-blur'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon, IconName } from './Icon'
 import { palette, S, W } from '../lib/theme'
 
@@ -179,9 +181,17 @@ const TAB_ITEMS: { key: TabKey; label: string; icon: IconName }[] = [
   { key: 'chat', label: '대화', icon: 'chat' },
 ]
 
+/** 루트 화면 콘텐츠가 탭바에 가리지 않도록 확보해야 하는 하단 여백(세이프에어리어 제외). */
+export const TABBAR_CONTENT_HEIGHT = 62
+
 export function TabBar({ active, onSelect }: { active: TabKey; onSelect: (k: TabKey) => void }) {
+  const insets = useSafeAreaInsets()
   return (
-    <View style={st.tabBar} accessibilityRole="tablist">
+    // iOS 네이티브 탭바 — 화면 맨 아래까지 내려가는 반투명 블러 재질(systemChromeMaterial풍).
+    // 홈 인디케이터 영역까지 재질이 이어지고, 위에는 헤어라인 한 줄만 긋는다.
+    <BlurView intensity={88} tint="extraLight"
+      style={[st.tabBar, { paddingBottom: Math.max(insets.bottom, 10) }]}
+      accessibilityRole="tablist">
       {TAB_ITEMS.map(t => {
         const on = t.key === active
         return (
@@ -190,12 +200,12 @@ export function TabBar({ active, onSelect }: { active: TabKey; onSelect: (k: Tab
             accessibilityState={{ selected: on }}
             accessibilityLabel={`${t.label}${on ? ', 선택됨' : ''}`}
             style={st.tab}>
-            <Icon name={t.icon} size={26} color={on ? C.acc : C.sub} />
+            <Icon name={t.icon} size={27} color={on ? C.acc : '#8E8E93'} />
             <Text style={[st.tabTx, on && { color: C.acc, fontWeight: W.extra }]}>{t.label}</Text>
           </Pressable>
         )
       })}
-    </View>
+    </BlurView>
   )
 }
 
@@ -250,16 +260,18 @@ const st = StyleSheet.create({
   backTx: { fontSize: 17, fontWeight: W.bold, color: C.acc },
   barTitle: { fontSize: 20, fontWeight: W.extra, color: C.ink },
 
-  // iOS 탭바 — 헤어라인 한 줄과 흰 배경만. 두꺼운 경계선을 쓰지 않는다.
+  // iOS 탭바 — 화면 하단에 붙는 반투명 재질. 배경색은 블러 위에 얹는 흰 베일이다.
   tabBar: {
-    flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#B2B2B7',
-    backgroundColor: '#fff', paddingTop: 8, paddingHorizontal: 8,
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    flexDirection: 'row', overflow: 'hidden',
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(0,0,0,0.22)',
+    backgroundColor: 'rgba(249,249,249,0.82)', paddingTop: 7, paddingHorizontal: 8,
   },
   tab: {
-    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4,
-    minHeight: 60, paddingVertical: 4, borderRadius: 14,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3,
+    minHeight: 52, paddingVertical: 2,
   },
-  tabTx: { fontSize: 13, fontWeight: W.bold, color: C.sub },
+  tabTx: { fontSize: 12, fontWeight: W.bold, color: '#8E8E93' },
 })
 
 export const layout = StyleSheet.create({

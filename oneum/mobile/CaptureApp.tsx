@@ -7,7 +7,7 @@
 import './lib/font'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { View, Text } from 'react-native'
-import { TabBar, layout } from './components/ui'
+import { TABBAR_CONTENT_HEIGHT, TabBar, layout } from './components/ui'
 import {
   ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen,
 } from './screens/Core'
@@ -139,8 +139,8 @@ export default function CaptureApp() {
   const { node, tab } = shotContent(shot)
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={layout.screen}>
-        <View style={{ flex: 1 }}>{node}</View>
+      <SafeAreaView style={layout.screen} edges={['top', 'left', 'right']}>
+        <View style={{ flex: 1, paddingBottom: tab ? TABBAR_CONTENT_HEIGHT : 0 }}>{node}</View>
         {tab && <TabBar active={tab} onSelect={noop} />}
       </SafeAreaView>
     </SafeAreaProvider>

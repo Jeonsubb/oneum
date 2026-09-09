@@ -30,7 +30,7 @@ import {
 } from './lib/quick'
 import { loadPrefs, savePrefs } from './lib/prefs'
 import { playSfx } from './lib/sfx'
-import { C, Btn, ScreenFade, TabBar, layout, type TabKey } from './components/ui'
+import { C, Btn, ScreenFade, TABBAR_CONTENT_HEIGHT, TabBar, layout, type TabKey } from './components/ui'
 import {
   ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, ListeningScreen,
 } from './screens/Core'
@@ -634,7 +634,8 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={layout.screen}>
+      {/* 하단 세이프에어리어는 탭바(블러 재질)가 직접 처리한다 — 탭바가 화면 맨 아래까지 내려간다 */}
+      <SafeAreaView style={layout.screen} edges={['top', 'left', 'right']}>
         <StatusBar style="dark" />
         {error ? (
           <View style={st.errorBar}>
@@ -642,7 +643,10 @@ export default function App() {
             <Btn label="닫기" variant="outline" onPress={() => setError('')} style={{ width: 96, minHeight: 48 }} />
           </View>
         ) : null}
-        <ScreenFade id={screen}>{content}</ScreenFade>
+        {/* 탭바가 absolute로 떠 있으므로, 탭바 있는 화면은 그 높이만큼 여백을 확보한다 */}
+        <View style={{ flex: 1, paddingBottom: showTabBar ? TABBAR_CONTENT_HEIGHT : 0 }}>
+          <ScreenFade id={screen}>{content}</ScreenFade>
+        </View>
         {showTabBar && activeTab && <TabBar active={activeTab} onSelect={goTab} />}
       </SafeAreaView>
     </SafeAreaProvider>
