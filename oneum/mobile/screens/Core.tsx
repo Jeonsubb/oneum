@@ -12,6 +12,7 @@ import { useAudioRecorderState, type AudioRecorder } from 'expo-audio'
 import { Icon } from '../components/Icon'
 import { Wordmark } from '../components/Wordmark'
 import { GlassView } from 'expo-glass-effect'
+import { LinearGradient } from 'expo-linear-gradient'
 import {
   AnimatedPressable, AppBar, Btn, C, Candidate, Chip, GLASS, NoneOfThem, SilenceBadge, Spacer,
   layout, usePressScale,
@@ -22,6 +23,34 @@ export { SITUATIONS } from '../lib/profile'
 export type { Situation } from '../lib/profile'
 import { SITUATIONS } from '../lib/profile'
 import type { Situation } from '../lib/profile'
+
+/* ── ⓪ 랜딩 — 앱을 여는 1.5초, 파란 화면 위 로고 하나 ─────── */
+/** 첫인상은 브랜드 하나만 남긴다. 로고가 떠오르고, 잠시 머물다, 홈으로 스르르 걷힌다. */
+export function LandingScreen({ onDone }: { onDone: () => void }) {
+  const rise = useRef(new Animated.Value(0)).current   // 로고 페이드인
+  const veil = useRef(new Animated.Value(1)).current   // 전체 페이드아웃
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(rise, { toValue: 1, duration: 550, useNativeDriver: true }),
+      Animated.delay(1000),
+      Animated.timing(veil, { toValue: 0, duration: 420, useNativeDriver: true }),
+    ]).start(() => onDone())
+  }, [rise, veil, onDone])
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { opacity: veil, zIndex: 10 }]}
+      pointerEvents="none">
+      <LinearGradient colors={['#0A84FF', '#0050C8']} style={st.landing}>
+        <Animated.View style={{
+          alignItems: 'center', gap: 16, opacity: rise,
+          transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+        }}>
+          <Wordmark height={76} color="#fff" />
+          <Text style={st.landingTag}>내 말은, 내가 확정한다</Text>
+        </Animated.View>
+      </LinearGradient>
+    </Animated.View>
+  )
+}
 
 /* ── ① 홈 / 대기 ─────────────────────────────────────────── */
 export function HomeScreen({
@@ -51,7 +80,10 @@ export function HomeScreen({
         </Pressable>
       )}
 
-      <Text style={layout.fieldLabel}>지금 상황을 골라주세요</Text>
+      {/* 서비스가 하는 일을 첫 문장으로 — 기능 설명이 아니라 약속의 어조로 말한다 */}
+      <Text style={st.heroCopy}>발음이 뭉개져도,{'\n'}당신의 말을 또렷하게 전할게요</Text>
+
+      <Text style={st.situLabel}>지금 상황을 골라주세요</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}
         style={st.chipsScroll} contentContainerStyle={st.chips}>
         {SITUATIONS.map(s => (
@@ -60,7 +92,13 @@ export function HomeScreen({
       </ScrollView>
 
       <View style={st.micWrap}>
-        <MicButton onPress={onMicDown} />
+        {/* 버튼 뒤에 겹겹이 번지는 옅은 파랑 — 소리가 퍼지는 자리라는 인상을 만든다 */}
+        <View style={st.haloWrap}>
+          <View style={[st.halo, st.halo3]} />
+          <View style={[st.halo, st.halo2]} />
+          <View style={[st.halo, st.halo1]} />
+          <MicButton onPress={onMicDown} />
+        </View>
         <Text style={layout.guide}>누르면 듣기 시작해요.{'\n'}다 말한 뒤 한 번 더 눌러 주세요</Text>
       </View>
 
@@ -351,7 +389,21 @@ const st = StyleSheet.create({
   chipsScroll: { flexGrow: 0, flexShrink: 0 },
   chips: { gap: 12, marginTop: 14, paddingRight: 24, alignItems: 'center' },
 
+  landing: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  landingTag: { fontSize: 17, fontWeight: W.bold, color: 'rgba(255,255,255,0.88)', letterSpacing: 0.5 },
+
+  heroCopy: {
+    fontSize: 25, fontWeight: W.extra, lineHeight: 25 * 1.42, color: C.ink,
+    marginTop: 22, letterSpacing: -0.3,
+  },
+  situLabel: { fontSize: 14.5, fontWeight: W.bold, color: C.sub, marginTop: 24 },
+
   micWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 26 },
+  haloWrap: { alignItems: 'center', justifyContent: 'center' },
+  halo: { position: 'absolute', borderRadius: 999 },
+  halo1: { width: S.micSize * 1.32, height: S.micSize * 1.32, backgroundColor: 'rgba(0,122,255,0.10)' },
+  halo2: { width: S.micSize * 1.68, height: S.micSize * 1.68, backgroundColor: 'rgba(0,122,255,0.06)' },
+  halo3: { width: S.micSize * 2.08, height: S.micSize * 2.08, backgroundColor: 'rgba(0,122,255,0.035)' },
   micBtn: {
     width: S.micSize, height: S.micSize, borderRadius: S.micSize / 2,
     backgroundColor: C.accFill,

@@ -32,7 +32,8 @@ import { loadPrefs, savePrefs } from './lib/prefs'
 import { playSfx } from './lib/sfx'
 import { C, Btn, ScreenFade, TABBAR_CONTENT_HEIGHT, TabBar, layout, type TabKey } from './components/ui'
 import {
-  ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, ListeningScreen,
+  ConfirmChoiceScreen, ConfirmSureScreen, DeliverScreen, FailScreen, HomeScreen, LandingScreen,
+  ListeningScreen,
 } from './screens/Core'
 import { EditScreen, OnboardScreen } from './screens/Support'
 import {
@@ -112,6 +113,8 @@ const CHAT_SCENARIOS: ChatScenario[] = [
 ]
 
 export default function App() {
+  // 랜딩 — 앱을 열 때 한 번, 파란 화면 위 로고가 떠올랐다 걷힌다
+  const [landed, setLanded] = useState(false)
   const [screen, setScreen] = useState<Screen>('home')
   const [situation, setSituation] = useState<Situation>('일상')
   const [candidates, setCandidates] = useState<RankedCandidate[]>([])
@@ -659,6 +662,8 @@ export default function App() {
         </View>
         {showTabBar && activeTab && <TabBar active={activeTab} onSelect={goTab} />}
       </SafeAreaView>
+      {/* 랜딩은 상태바·홈 인디케이터 영역까지 전부 덮는다 — SafeArea 바깥에 둔다 */}
+      {!landed && <LandingScreen onDone={() => setLanded(true)} />}
     </SafeAreaProvider>
   )
 }
