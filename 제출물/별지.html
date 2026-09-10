@@ -56,9 +56,9 @@
   <p style="font-size:10.2pt; line-height:1.7;">
     온음은 구음장애인의 발화를 음성인식으로 받아 후보를 그 사람에게 맞춰 정렬하고,
     <b>사용자가 직접 확정한 문장만</b> 큰 글자와 명료한 음성으로 전달하는 서비스입니다.
-    이 별지는 ① 시스템 구성도, ② 화면 흐름(실제 구현 화면), ③ 기술 실증 수치,
-    ④ 선행 서비스·연구 비교를 담고 있습니다. 수록된 화면은 목업이 아니라
-    <b>실기기(iOS)에서 동작 중인 앱</b>의 화면입니다.
+    이 별지는 ① 시스템 구성도 ② 시스템 아키텍처 ③ 사용자 플로우 ④ 기능 명세
+    ⑤⑥ 화면 흐름(실제 구현 화면) ⑦ 기술 실증 수치 ⑧ 선행 서비스·연구 비교를 담고 있습니다. 수록된 화면은 목업이 아니라
+    <b>실기기(iOS)에서 동작 중인 앱</b>의 화면이며, 전체 코드는 github.com/Jeonsubb/oneum 에 공개되어 있습니다.
   </p>
 
   <h2>① 시스템 구성도: 두 엔진의 앙상블과 확정 게이트</h2>
@@ -115,12 +115,208 @@
     <li><b>안전 원칙</b>: 확정 게이트를 지나지 않은 문장은 재생되지 않습니다. AI가 만든 복원 후보는 반드시 ‘제안’ 표식을 달고 같은 게이트를 거칩니다.</li>
   </ul>
 
-  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>1 / 5</span></div>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>1 / 8</span></div>
+</div>
+
+
+<!-- ═══════════ 신규: 시스템 아키텍처 ═══════════ -->
+<div class="page">
+  <h2 style="margin-top:0;">② 시스템 아키텍처: 무상태 서버, 기기 안의 개인 데이터</h2>
+  <div class="diagram">
+  <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" font-family="KoddiUD, sans-serif">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1D4ED8"/></marker></defs>
+    <!-- 클라이언트 -->
+    <rect x="8" y="14" width="230" height="360" rx="12" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
+    <text x="123" y="42" text-anchor="middle" font-size="14.5" font-weight="800" fill="#1D4ED8">온음 앱 (iOS)</text>
+    <text x="123" y="60" text-anchor="middle" font-size="10" fill="#43474D">React Native · Expo</text>
+    <rect x="24" y="74" width="198" height="46" rx="8" fill="#fff" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="123" y="93" text-anchor="middle" font-size="11" font-weight="800">화면 17종 (단일 상태 라우터)</text>
+    <text x="123" y="110" text-anchor="middle" font-size="9.5" fill="#43474D">확정 게이트 · 대면 모드 · 연습 · AI 대화</text>
+    <rect x="24" y="128" width="198" height="46" rx="8" fill="#fff" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="123" y="147" text-anchor="middle" font-size="11" font-weight="800">개인화 재정렬 엔진</text>
+    <text x="123" y="164" text-anchor="middle" font-size="9.5" fill="#43474D">한글 자모 유사도 · 등록 표현 · 교정 이력</text>
+    <rect x="24" y="182" width="198" height="46" rx="8" fill="#fff" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="123" y="201" text-anchor="middle" font-size="11" font-weight="800">빠른 발화 판정기 (6조건)</text>
+    <text x="123" y="218" text-anchor="middle" font-size="9.5" fill="#43474D">고위험 문장 차단 · 취소 · 자동 잠금</text>
+    <rect x="24" y="236" width="198" height="58" rx="8" fill="#E3EBFF" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="123" y="256" text-anchor="middle" font-size="11" font-weight="800" fill="#1D4ED8">기기 내 저장소 (AsyncStorage)</text>
+    <text x="123" y="272" text-anchor="middle" font-size="9.5" fill="#43474D">등록 문장 · 교정 이력 · 빠른 발화 목록</text>
+    <text x="123" y="286" text-anchor="middle" font-size="9.5" fill="#43474D">동의 상태 · 발화 기록 — 전부 휴대폰 안</text>
+    <rect x="24" y="302" width="198" height="46" rx="8" fill="#fff" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="123" y="321" text-anchor="middle" font-size="11" font-weight="800">음성 입출력</text>
+    <text x="123" y="338" text-anchor="middle" font-size="9.5" fill="#43474D">녹음(레벨 측정) · TTS · 효과음 · 햅틱</text>
+    <!-- 백엔드 -->
+    <rect x="278" y="80" width="200" height="230" rx="12" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+    <text x="378" y="108" text-anchor="middle" font-size="14.5" font-weight="800" fill="#1D4ED8">백엔드 (FastAPI)</text>
+    <text x="378" y="126" text-anchor="middle" font-size="10" fill="#43474D">무상태 프록시 — 키 보호·중계만</text>
+    <rect x="294" y="140" width="168" height="34" rx="8" fill="#F4F6FE" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="378" y="161" text-anchor="middle" font-size="10.5" font-weight="800">/recognize — 2엔진 앙상블 병합</text>
+    <rect x="294" y="182" width="168" height="34" rx="8" fill="#F4F6FE" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="378" y="203" text-anchor="middle" font-size="10.5" font-weight="800">/recover — LLM 의도 복원</text>
+    <rect x="294" y="224" width="168" height="34" rx="8" fill="#F4F6FE" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="378" y="245" text-anchor="middle" font-size="10.5" font-weight="800">/chat — AI 대화 상대역</text>
+    <rect x="294" y="266" width="168" height="30" rx="8" fill="#F4F6FE" stroke="#C3C6CC" stroke-width="1.5"/>
+    <text x="378" y="285" text-anchor="middle" font-size="10.5" font-weight="800">개인 데이터 저장 없음</text>
+    <!-- 추론·외부 -->
+    <rect x="518" y="14" width="234" height="106" rx="12" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
+    <text x="635" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#1D4ED8">파인튜닝 Whisper 추론 서버</text>
+    <text x="635" y="60" text-anchor="middle" font-size="10" fill="#43474D">whisper-small 244M · AI Hub 학습</text>
+    <text x="635" y="76" text-anchor="middle" font-size="10" fill="#43474D">빔서치 N-best · 반복 생성 방지</text>
+    <text x="635" y="92" text-anchor="middle" font-size="10" fill="#43474D">Apple Silicon GPU(MPS) 실행</text>
+    <text x="635" y="108" text-anchor="middle" font-size="10" font-weight="800" fill="#1D4ED8">정확한 1순위 담당</text>
+    <rect x="518" y="140" width="234" height="80" rx="12" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="635" y="166" text-anchor="middle" font-size="13" font-weight="800">Azure Speech STT</text>
+    <text x="635" y="186" text-anchor="middle" font-size="10" fill="#43474D">범용 인식 · N-best 다중 후보 + 신뢰도</text>
+    <text x="635" y="202" text-anchor="middle" font-size="10" font-weight="800" fill="#1D4ED8">후보 다양성 담당 (암호화 전송)</text>
+    <rect x="518" y="240" width="234" height="80" rx="12" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="635" y="266" text-anchor="middle" font-size="13" font-weight="800">LLM (Gemini)</text>
+    <text x="635" y="286" text-anchor="middle" font-size="10" fill="#43474D">저신뢰 시 의도 후보 복원("제안" 표식)</text>
+    <text x="635" y="302" text-anchor="middle" font-size="10" fill="#43474D">AI 대화 연습 상대역 (연습 전용)</text>
+    <!-- 화살표 -->
+    <line x1="238" y1="195" x2="274" y2="195" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="256" y="186" text-anchor="middle" font-size="8.5" fill="#43474D">HTTPS</text>
+    <line x1="478" y1="157" x2="514" y2="80" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <line x1="478" y1="170" x2="514" y2="180" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="497" y="128" text-anchor="middle" font-size="8.5" fill="#43474D">동시 호출</text>
+    <line x1="478" y1="248" x2="514" y2="278" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar2)"/>
+  </svg>
+  </div>
+  <table>
+    <tr><th>계층</th><th>기술</th><th>역할</th></tr>
+    <tr><td>모바일 앱</td><td>React Native (Expo SDK 57), TypeScript</td><td>전 화면·확정 게이트·재정렬·판정기·기기 내 저장. iOS 실기기 동작, 안드로이드 빌드 가능 구조</td></tr>
+    <tr><td>백엔드</td><td>FastAPI (Python), 무상태</td><td>API 키 보호와 중계. 앙상블 병합(두 엔진 일치 시 신뢰도 가산). 한쪽 엔진 실패 시에도 진행</td></tr>
+    <tr><td>인식 모델</td><td>whisper-small 파인튜닝 (244M)</td><td>AI Hub 구음장애 데이터 학습. 온디바이스 이식이 가능한 크기(로드맵)</td></tr>
+    <tr><td>보조 AI</td><td>Azure Speech, Gemini</td><td>다중 후보 생성 / 저신뢰 복원·대화 상대역. 교체 가능한 구조(공급자 추상화)</td></tr>
+  </table>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>2 / 8</span></div>
+</div>
+
+<!-- ═══════════ 신규: 사용자 플로우 ═══════════ -->
+<div class="page">
+  <h2 style="margin-top:0;">③ 사용자 플로우: 모든 길이 확정 게이트를 지난다</h2>
+  <div class="diagram">
+  <svg viewBox="0 0 760 560" xmlns="http://www.w3.org/2000/svg" font-family="KoddiUD, sans-serif">
+    <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1D4ED8"/></marker></defs>
+    <!-- 상단 흐름 -->
+    <rect x="20" y="16" width="150" height="52" rx="10" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
+    <text x="95" y="38" text-anchor="middle" font-size="12" font-weight="800">① 홈</text>
+    <text x="95" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">상황 선택 → 눌러서 말하기</text>
+    <rect x="210" y="16" width="150" height="52" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="285" y="38" text-anchor="middle" font-size="12" font-weight="800">② 듣는 중</text>
+    <text x="285" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">목소리 반응 파동 · 재탭으로 종료</text>
+    <rect x="400" y="16" width="160" height="52" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
+    <text x="480" y="38" text-anchor="middle" font-size="12" font-weight="800">앙상블 인식 + 재정렬</text>
+    <text x="480" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">파인튜닝+범용 동시 · 개인 표현 대조</text>
+    <rect x="600" y="16" width="150" height="52" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="675" y="38" text-anchor="middle" font-size="12" font-weight="800">빠른 발화 판정</text>
+    <text x="675" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">6조건 전부 충족?</text>
+    <line x1="170" y1="42" x2="206" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="360" y1="42" x2="396" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="560" y1="42" x2="596" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <!-- 빠른 발화 경로 (오른쪽 아래) -->
+    <line x1="675" y1="68" x2="675" y2="102" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="700" y="90" font-size="9" fill="#1D4ED8" font-weight="800">충족</text>
+    <rect x="600" y="106" width="150" height="46" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
+    <text x="675" y="126" text-anchor="middle" font-size="11" font-weight="800">0.5초 미리보기</text>
+    <text x="675" y="142" text-anchor="middle" font-size="9.5" fill="#43474D">이 안에 취소 가능</text>
+    <line x1="675" y1="152" x2="675" y2="186" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <rect x="600" y="190" width="150" height="46" rx="10" fill="#2563EB"/>
+    <text x="675" y="210" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">즉시 재생</text>
+    <text x="675" y="226" text-anchor="middle" font-size="9.5" fill="#DCE7FF">재생 후 3초 취소권 · 취소 시 잠금</text>
+    <!-- 판정 미충족 → 게이트 분기 -->
+    <line x1="600" y1="55" x2="480" y2="96" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="548" y="86" font-size="9" fill="#43474D" font-weight="800">미충족 (표시 없이 게이트로)</text>
+    <rect x="390" y="100" width="180" height="44" rx="10" fill="#FAEEDC" stroke="#B98A3A" stroke-width="2"/>
+    <text x="480" y="119" text-anchor="middle" font-size="11.5" font-weight="800">재정렬 점수 분기</text>
+    <text x="480" y="136" text-anchor="middle" font-size="9.5" fill="#43474D">확신 / 불확실 / 실패</text>
+    <!-- 3분기 -->
+    <line x1="420" y1="144" x2="150" y2="196" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="268" y="168" font-size="9" fill="#43474D" font-weight="800">확신 (점수 ≥ 0.75)</text>
+    <line x1="480" y1="144" x2="480" y2="196" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="522" y="172" font-size="9" fill="#43474D" font-weight="800">불확실 (0.35~0.75)</text>
+    <line x1="510" y1="144" x2="640" y2="300" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="530" y="262" font-size="9" fill="#43474D" font-weight="800">저신뢰 (&lt; 0.35)</text>
+    <!-- 확인 A -->
+    <rect x="40" y="200" width="220" height="64" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+    <text x="150" y="222" text-anchor="middle" font-size="12" font-weight="800">③ 확인 A — "이 말이 맞나요?"</text>
+    <text x="150" y="240" text-anchor="middle" font-size="9.5" fill="#43474D">확신해도 재생하지 않고 먼저 묻는다</text>
+    <text x="150" y="256" text-anchor="middle" font-size="9.5" fill="#43474D">맞아요 / 다른 후보 보기</text>
+    <!-- 확인 B -->
+    <rect x="370" y="200" width="220" height="64" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+    <text x="480" y="222" text-anchor="middle" font-size="12" font-weight="800">④ 확인 B — 후보 2~3개 선택</text>
+    <text x="480" y="240" text-anchor="middle" font-size="9.5" fill="#43474D">저신뢰 시 LLM 복원 후보 "제안" 합류</text>
+    <text x="480" y="256" text-anchor="middle" font-size="9.5" fill="#43474D">고치기 / 이 중에 없어요</text>
+    <!-- 실패 -->
+    <rect x="530" y="304" width="220" height="64" rx="10" fill="#FBECEA" stroke="#D70015" stroke-width="2"/>
+    <text x="640" y="326" text-anchor="middle" font-size="12" font-weight="800">⑦ 실패 — 대화는 계속</text>
+    <text x="640" y="344" text-anchor="middle" font-size="9.5" fill="#43474D">다시 말하기 / 직접 입력</text>
+    <text x="640" y="360" text-anchor="middle" font-size="9.5" fill="#43474D">2회 실패 시 직접 입력을 앞세움</text>
+    <!-- 수정 -->
+    <rect x="370" y="304" width="130" height="46" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="435" y="323" text-anchor="middle" font-size="11" font-weight="800">⑤ 문장 고치기</text>
+    <text x="435" y="340" text-anchor="middle" font-size="9.5" fill="#43474D">필요한 만큼만 수정</text>
+    <line x1="480" y1="264" x2="450" y2="300" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
+    <!-- 확정 게이트 -->
+    <rect x="110" y="400" width="380" height="52" rx="12" fill="#2563EB"/>
+    <text x="300" y="422" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fff">확정 게이트 — 사용자가 고른 문장만 통과</text>
+    <text x="300" y="440" text-anchor="middle" font-size="10" fill="#DCE7FF">게이트를 지나지 않은 문장은 어떤 경우에도 소리 나지 않는다 (QA-01)</text>
+    <line x1="150" y1="264" x2="240" y2="396" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="450" y1="264" x2="340" y2="396" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="435" y1="350" x2="370" y2="398" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
+    <line x1="620" y1="368" x2="480" y2="410" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
+    <text x="565" y="398" font-size="9" fill="#43474D" font-weight="800">직접 입력 후 확정</text>
+    <!-- 전달 -->
+    <rect x="110" y="482" width="380" height="56" rx="12" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
+    <text x="300" y="504" text-anchor="middle" font-size="12.5" font-weight="800">⑥ 전달 — 큰 글자 + 명료한 음성(TTS) + 대면 모드</text>
+    <text x="300" y="522" text-anchor="middle" font-size="10" fill="#43474D">확정 결과는 교정 이력으로 축적 → 다음 재정렬에 반영 (쓸수록 맞춰짐)</text>
+    <line x1="300" y1="452" x2="300" y2="478" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <path d="M 110 512 C 30 512 20 320 20 200 C 20 120 30 90 90 72" fill="none" stroke="#8A8ACC" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ar3)"/>
+    <text x="36" y="330" font-size="9" fill="#6D6D72" font-weight="800" transform="rotate(-90 36 330)">교정 이력 학습 루프 (SF-07)</text>
+  </svg>
+  </div>
+  <p style="font-size:9pt; color:#43474D;">연습·대화 탭의 플로우: 연습(상황/읽기)은 문장당 3회 읽기 → 문장별 인식 검증 → 통과 시 사용자가 명시적으로 빠른 발화 등록(당일은 게이트로만, 다음날부터 즉시 재생). AI 대화는 말하기 → 전사 → AI 상대역 음성 응답의 반복이며 실사용 경로와 분리되어 있습니다.</p>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>3 / 8</span></div>
+</div>
+
+<!-- ═══════════ 신규: 기능 명세 ═══════════ -->
+<div class="page">
+  <h2 style="margin-top:0;">④ 기능 명세: 명세서 기준 구현 현황</h2>
+  <p>서비스 기능은 내부 아키텍처 명세서(v3)의 기능 ID로 관리됩니다. 아래는 접수 시점의 구현 현황입니다.</p>
+  <table>
+    <tr><th style="width:9%;">ID</th><th style="width:22%;">기능</th><th>설명</th><th style="width:13%;">상태</th></tr>
+    <tr><td>SF-01</td><td>개인 표현 프로필</td><td>자주 쓰는 문장 등록(추천 담기·직접 입력)·삭제. 상황 태그 지정</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-02</td><td>발화 단위 음성인식</td><td>파인튜닝 Whisper + Azure 2엔진 동시 호출, 후보 병합(일치 시 신뢰도 가산)</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-03</td><td>후보 재정렬·LLM 복원</td><td>자모 유사도로 등록 표현·교정 이력 대조 재정렬. 저신뢰 시 LLM 의도 복원("제안")</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-04</td><td>의도 확인 장치</td><td>확정 게이트 — 확신 시에도 묻고, 불확실 시 후보 2~3개 + "이 중에 없어요"</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-05</td><td>오류 복구 경로</td><td>다시 말하기·직접 입력·문장 고치기. 2회 실패 시 재발화를 강요하지 않음</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-06</td><td>확정 문장 출력</td><td>큰 글자 + TTS. 문장 탭 → 상대에게 화면 가득 보여주는 대면 모드</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-07</td><td>교정 이력 축적 학습</td><td>(오인식→확정) 쌍 저장 → 재정렬·LLM few-shot 반영. 재학습 없는 개인화</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-08</td><td>개인정보 통제</td><td>기기 내 저장, 전송처 상시 고지, 연습 녹음 용도별 분리 동의</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-09</td><td>외부 스피커 출력</td><td>시중 블루투스 스피커 페어링(OS 기본) — 소리 출력 기기 상시 표기</td><td>기기 기본</td></tr>
+    <tr><td>SF-10</td><td>문장 등록 도우미</td><td>상황별 추천 문장 20문장 탭 1회 담기 (녹음·타이핑 없이 시작)</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-11</td><td>상황별 표현 세트</td><td>일상·병원·매장·공공기관 4상황. 수동 선택(자동 추정 안 함, DD-06)</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-12</td><td>연습 모드</td><td>상황 연습 + 읽기 연습(시·뉴스·문단). 문장당 3회, 점수·등급 없음</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-13</td><td>연습 녹음의 적응 전환</td><td>연습 녹음 → 문장별 인식 검증 데이터. 발음 적응 학습은 본선 로드맵</td><td>부분 구현</td></tr>
+    <tr><td>SF-14</td><td>빠른 발화 경로</td><td>검증·등록 문장만 6조건 판정 후 즉시 재생. 금액·동의·거절·개인정보 차단</td><td class="hl">구현 완료</td></tr>
+    <tr><td>SF-15</td><td>발화 취소</td><td>재생 전 0.5초 + 재생 후 3초 취소. 취소 문장 자동 잠금, 기록 열람</td><td class="hl">구현 완료</td></tr>
+    <tr><td>추가</td><td>AI 대화 연습</td><td>명세 외 추가 구현 — AI 상대역과 상황극(병원 접수·카페·주민센터), 연습 전용</td><td class="hl">구현 완료</td></tr>
+  </table>
+  <h3>품질 목표(QA) 충족 방식</h3>
+  <ul>
+    <li><b>QA-01 의도 통제</b>: 소리가 나는 지점을 확정 게이트 통과 후와 사전 승인된 빠른 발화 두 곳으로 코드 구조상 제한.</li>
+    <li><b>QA-03 표시 지연</b>: 두 엔진 동시 호출로 지연 비합산. 개발 장비 실측 로컬 추론 약 2초/5초 오디오.</li>
+    <li><b>QA-05 프라이버시</b>: 서버 무상태 설계로 개인 데이터가 서버에 존재하지 않음. 전송 사실은 홈 화면 상시 고지.</li>
+    <li><b>QA-06 엔진 교체 용이성</b>: ASR·LLM 공급자를 환경 변수로 전환(mock/로컬/클라우드) — 특정 업체 종속 없음.</li>
+    <li><b>QA-07 오출력 상한</b>: 즉시 발화·강등·취소가 전건 기록되며 사용자가 직접 열람·검증 가능.</li>
+  </ul>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>4 / 8</span></div>
 </div>
 
 <!-- ═══════════ 2쪽: 화면 흐름 (핵심 경로) ═══════════ -->
 <div class="page">
-  <h2 style="margin-top:0;">② 화면 흐름 1: 말하고, 고르고, 확정하는 핵심 경로</h2>
+  <h2 style="margin-top:0;">⑤ 화면 흐름 1: 말하고, 고르고, 확정하는 핵심 경로</h2>
   <p>실기기에서 동작 중인 화면입니다. 어떤 경로로 들어와도 전달 화면으로 합류하며, 막다른 화면이 없습니다.</p>
 
   <div class="shots">
@@ -144,12 +340,12 @@
     주 터치 타깃은 64pt 이상입니다.
   </div>
 
-  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>2 / 5</span></div>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>5 / 8</span></div>
 </div>
 
 <!-- ═══════════ 3쪽: 화면 흐름 (연습·대화) ═══════════ -->
 <div class="page">
-  <h2 style="margin-top:0;">③ 화면 흐름 2: 연습 등록과 AI 대화 연습</h2>
+  <h2 style="margin-top:0;">⑥ 화면 흐름 2: 연습 등록과 AI 대화 연습</h2>
 
   <div class="shots">
     <div class="shot"><div class="frame"><img src="캡처/consent.png"></div><div class="cap"><b>연습 녹음 동의</b>: 용도별 분리 동의.<br>모두 꺼도 연습 가능</div></div>
@@ -175,12 +371,12 @@
     </div>
   </div>
 
-  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>3 / 5</span></div>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>6 / 8</span></div>
 </div>
 
 <!-- ═══════════ 4쪽: 기술 실증 ═══════════ -->
 <div class="page">
-  <h2 style="margin-top:0;">④ 기술 실증: AI Hub 구음장애 데이터 파인튜닝 (검증 전 내부 실측값)</h2>
+  <h2 style="margin-top:0;">⑦ 기술 실증: AI Hub 구음장애 데이터 파인튜닝 (검증 전 내부 실측값)</h2>
   <p>정부가 2021년 구축한 AI Hub 「구음장애 음성인식 데이터」(원천 258.8시간)에서 발화 구간을 검출·정렬해
   34.9시간의 학습 데이터를 만들고, whisper-small(244M)을 파인튜닝했습니다. 학습·평가 파이프라인 전체가
   재현 가능한 코드로 관리됩니다.</p>
@@ -207,12 +403,12 @@
     <li><b>과적합 관리</b>: 학습 에폭별 평가로 낯선 화자 성능이 꺾이는 지점을 찾아 최적 체크포인트를 채택했습니다.</li>
   </ul>
 
-  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>4 / 5</span></div>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>7 / 8</span></div>
 </div>
 
 <!-- ═══════════ 5쪽: 비교표 ═══════════ -->
 <div class="page">
-  <h2 style="margin-top:0;">⑤ 선행 서비스·연구 비교: 온음이 채우는 자리</h2>
+  <h2 style="margin-top:0;">⑧ 선행 서비스·연구 비교: 온음이 채우는 자리</h2>
   <table>
     <tr>
       <th style="width:17%;">구분</th><th>한국어</th><th>인식 방식</th><th>오인식 처리</th><th>현재 상태</th>
@@ -273,11 +469,11 @@
 
   <div class="note">
     <b>데모</b>: 실기기 시연 영상은 접수 후 심사 인터뷰에서 직접 보여드릴 수 있습니다.
-    앱·백엔드·학습 파이프라인 전체가 재현 가능한 코드로 관리되고 있습니다.
+    앱·백엔드·학습 파이프라인 전체가 재현 가능한 코드로 공개되어 있습니다. <b>코드 저장소: github.com/Jeonsubb/oneum</b>
    
   </div>
 
-  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>5 / 5</span></div>
+  <div class="footer"><span>온음(Oneum) · D-Tech Track 1 별지</span><span>8 / 8</span></div>
 </div>
 
 </body>
