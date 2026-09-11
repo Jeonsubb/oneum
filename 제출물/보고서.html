@@ -19,7 +19,8 @@
 
   h2 { font-size: 14pt; font-weight: 800; color: #1D4ED8; margin: 6mm 0 2.5mm; padding-bottom: 1.2mm; border-bottom: 2.5px solid #2563EB; }
   h3 { font-size: 11pt; font-weight: 800; margin: 4mm 0 1.5mm; }
-  p, li { font-size: 9.6pt; line-height: 1.62; }
+  p { font-size: 9.6pt; line-height: 1.62; margin-bottom: 3.4mm; }
+  li { font-size: 9.6pt; line-height: 1.62; margin-bottom: 1.6mm; }
   ul { padding-left: 5mm; }
   li { margin-bottom: .8mm; }
   .note { font-size: 8.4pt; color: #43474D; background: #F4F4FF; border-left: 3px solid #2563EB; padding: 2mm 3mm; margin: 2.5mm 0; line-height: 1.55; }
@@ -68,7 +69,7 @@
       <tr><th>코드 저장소</th><td>github.com/Jeonsubb/oneum (공개)</td></tr>
     </table>
   </div>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>1 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>1 / 15</span></div>
 </div>
 
 <div class="page">
@@ -77,18 +78,21 @@
     구음장애(마비말장애)는 뇌성마비·뇌졸중·파킨슨병 등으로 발음 근육의 조절이 어려운 상태이며, 인지와 언어 능력은
     온전한 경우가 많다. 그러나 범용 음성인식의 성능은 구음장애 발화에서 급락한다. 자체 실측에서 범용 whisper-small의
     글자 오류율은 42.9%였고, 미국 Speech Accessibility Project 실측에서도 일반 화자 3.4%였던 단어 오류율이
-    파킨슨병 관련 구음장애 화자(211명)에서 36.3%로 벌어졌다. 더 심각한 문제는 오류율 자체가 아니다. 음성인식은 신뢰도가 낮아도
-    문장 하나를 그대로 출력하므로, 오인식된 문장이 "그 사람의 말"로 상대에게 전달될 수 있다. 본 과제는 이를
+    파킨슨병 관련 구음장애 화자(211명)에서 36.3%로 벌어졌다.</p>
+  <p style="font-size:10pt; line-height:1.75;">더 심각한 문제는 오류율 자체가 아니다. 음성인식은 신뢰도가 낮아도
+    문장 하나를 그대로 출력하므로, 오인식된 문장이 "그 사람의 말"로 상대에게 전달될 수 있다.</p>
+  <p style="font-size:10pt; line-height:1.75;">본 과제는 이를
     "인식률 문제"가 아니라 <b>"오인식을 누가 통제하는가"</b>의 문제로 정의하고, AI는 후보를 제시하되 사용자가
     확정한 문장만 출력하는 <b>의도 확인형 의사소통 보조</b>와, 상황별 문장·낭독 연습 기반의 <b>발음 훈련 보조</b>를
     함께 제공하는 서비스를 설계·구현했다.
   </p>
   <p style="font-size:10pt; line-height:1.75;">
     기술 검증으로 AI Hub 「구음장애 음성인식 데이터」로 whisper-small(244M)을 파인튜닝해, 학습에 쓰지 않은
-    화자 9명·400클립 기준 글자 오류율을 42.9%에서 18.7%로 낮췄다(상대 56% 개선, 검증 전 내부 실측값).
-    서비스는 파인튜닝 모델(정확한 1순위)과 범용 클라우드 STT(다중 후보)를 동시 호출하는 2-엔진 앙상블,
+    화자 9명·400클립 기준 글자 오류율을 42.9%에서 18.7%로 낮췄다(상대 56% 개선, 검증 전 내부 실측값).</p>
+  <p style="font-size:10pt; line-height:1.75;">서비스는 파인튜닝 모델(정확한 1순위)과 범용 클라우드 STT(다중 후보)를 동시 호출하는 2-엔진 앙상블,
     등록 표현·교정 이력 기반 재정렬, 확정 게이트, 연습 검증을 전제로 한 빠른 발화, AI 상대역과의 대화 연습으로
-    구성되며, 전 흐름을 iOS 앱으로 구현해 실기기에서 동작을 확인했다. 이하 2장은 문제의 규모와 근거, 3장은
+    구성되며, 전 흐름을 iOS 앱으로 구현해 실기기에서 동작을 확인했다.</p>
+  <p style="font-size:10pt; line-height:1.75;">이하 2장은 문제의 규모와 근거, 3장은
     설계, 4장은 구현, 5장은 실험 결과와 한계를 지원서보다 상세히 기술한다.
   </p>
 
@@ -103,19 +107,23 @@
     <tr><td>6</td><td>결론 및 향후 과제</td></tr>
     <tr><td>—</td><td>참고 자료 / 부록 A. 서비스 포스터</td></tr>
   </table>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>2 / 15</span></div>
+</div>
 
-  <h2>1. 서론</h2>
+<div class="page">
+
+  <h2 style="margin-top:0;">1. 서론</h2>
   <p>말할 내용이 분명한 사람이 발음 때문에 "말할 수 없는 사람"이 된다. 구음장애인은 전화에서 상담원이 끊거나
   대리인을 요구받고, 대면에서는 취객이나 인지장애로 오해받는 낙인을 겪으며, 시리·ARS·AI 콜봇 등 음성 인터페이스
   전반에서 사실상 배제된다. 손 사용까지 어려운 뇌성마비 당사자에게는 음성이 유일한 대안인데 그 문이 닫혀 있다.</p>
   <p>주목할 점은 이것이 기술 부재의 문제가 아니라는 사실이다. 정부는 2021년 AI Hub에 화자 1,200명·5,000시간
-  이상의 구음장애 음성 데이터를 구축했고, 2025년에는 이 데이터를 활용한 국내 학술 연구도 발표되었다. 그러나
-  이 데이터를 사용한 상용 서비스는 조사 시점(2026년 8월) 기준으로 확인되지 않았다. 본 과제는 그 원인을 "오인식이 불가피한 도메인에서
+  이상의 구음장애 음성 데이터를 구축했고, 2025년에는 이 데이터를 활용한 국내 학술 연구도 발표되었다.</p>
+  <p>그러나 이 데이터를 사용한 상용 서비스는 조사 시점(2026년 8월) 기준으로 확인되지 않았다. 본 과제는 그 원인을 "오인식이 불가피한 도메인에서
   오인식을 다루는 제품 설계가 없었기 때문"으로 진단하고, 오류를 없애는 접근 대신 <b>사용자가 오류를 통제하는
   구조(확정 게이트)</b>를 중심에 둔 서비스를 제안한다.</p>
   <p>본 보고서는 지원서에 담지 못한 상세를 다룬다: 문제의 규모를 뒷받침하는 통계와 출처(2장), 시스템의 내부
   구조와 데이터 흐름(3장), 기능 단위 구현 현황과 학습 파이프라인(4장), 그리고 실험 조건과 수치의 한계(5장)다.</p>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>2 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>3 / 15</span></div>
 </div>
 
 <div class="page">
@@ -132,7 +140,8 @@
   </table>
   <p style="font-size:9pt; color:#43474D;">등록 언어장애 2.4만 명은 대상 인구의 하한선이다. 구음장애는 별도 등록 유형이 아니라 뇌병변·파킨슨병·뇌졸중
   후유증에 동반되는 경우가 많아, 서울시 조사처럼 "의사소통 곤란" 기준으로 집계하면 서울에서만 등록장애인의
-  44.6%(약 17.6만 명)에 이른다. 65세 이상이 등록장애인의 54.3%이고 뇌졸중·파킨슨병이 주로 고령에서 발병하는
+  44.6%(약 17.6만 명)에 이른다.</p>
+  <p style="font-size:9pt; color:#43474D;">65세 이상이 등록장애인의 54.3%이고 뇌졸중·파킨슨병이 주로 고령에서 발병하는
   점을 고려하면 대상 인구가 줄어들 가능성은 낮다고 해석되나, 이는 직접 통계가 아닌 추정이다. 한편 장애인의
   차별 경험 인식은 2020년 63.5%에서 80.1%로 높아졌다(장애인 실태조사).</p>
 
@@ -143,12 +152,17 @@
     <tr class="hl"><td>글자 오류율(CER), 한국어</td><td class="num">— </td><td class="num">42.9%</td><td>자체 실측 — 범용 whisper-small, AI Hub 검증 화자</td></tr>
   </table>
   <p>위 표의 격차는 10배가 넘는다(3.4% 대 36.3%). 이 격차는 두 층위의 문제로 이어진다. 첫째, ARS·콜봇·음성비서
-  등 음성 자동화가 확대될수록 구음장애인이 접근할 수 없는 서비스도 함께 늘어난다. 둘째, 음성인식은 신뢰도가
+  등 음성 자동화가 확대될수록 구음장애인이 접근할 수 없는 서비스도 함께 늘어난다.</p>
+  <p>둘째, 음성인식은 신뢰도가
   낮아도 문장 하나를 출력하므로, 오인식된 문장이 <b>"그 사람의 말"로 상대에게 전달</b>될 수 있다. 이는 의사소통
   실패를 넘어 의사 왜곡이다. 이 두 층위 때문에 본 과제는 인식률 개선과 오출력 통제를 별개의 요구사항으로
   정의했고, 후자를 제품 구조(확정 게이트)로 풀었다.</p>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>4 / 15</span></div>
+</div>
 
-  <h3>2.3 당사자가 겪는 장면</h3>
+<div class="page">
+
+  <h3 style="margin-top:0;">2.3 당사자가 겪는 장면</h3>
   <ul>
     <li><b>전화</b>: 상담원이 알아듣지 못해 통화를 끊거나 "보호자를 바꿔 달라"고 요구한다. 통신중계 서비스(손말이음센터 107)가
     있으나 문자를 입력하면 중계사가 대신 읽어 주는 방식으로, 실시간성이 낮고 "내가 말하는" 경험이 아니다.</li>
@@ -165,7 +179,7 @@
   <p style="font-size:9pt; color:#43474D;">시장 신호: 구글은 비정형 발화 인식(Project Relate)을 시도했으나 한국어를
   지원한 적이 없고 현재 신규 등록이 중단됐다. 상용 서비스 Voiceitt(이스라엘)는 영어 전용이다. 즉 수요는 국제적으로
   확인됐지만 한국어 사용자는 선택지가 없다.</p>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>3 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>5 / 15</span></div>
 </div>
 
 <div class="page">
@@ -225,7 +239,7 @@
       오류 제거가 아니라 <b>사용자가 오류를 통제하는 구조(확정 게이트)</b>가 필요하다. 이것이 온음의 핵심 차별점이다.</li>
     <li><b>진입의 공백</b>: Project Relate 방식(최소 500문장 녹음 훈련)은 발화 자체가 힘든 당사자에게 높은 문턱이다. 온음은 녹음 없이 문장을 골라 담는 것으로 시작하고, 사용 중 쌓이는 교정 이력으로 개인화된다.</li>
   </ul>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>4 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>6 / 15</span></div>
 </div>
 
 <div class="page">
@@ -294,7 +308,7 @@
     <li><b>무상태 서버</b>: 서버는 API 키 보호와 중계만 담당하며, 개인 문장·교정 이력은 전부 사용자 기기 안에 저장된다.</li>
     <li><b>안전 원칙</b>: 확정 게이트를 지나지 않은 문장은 재생되지 않는다. AI가 만든 복원 후보는 "제안" 표식을 달고 같은 게이트를 거친다.</li>
   </ul>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>5 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>7 / 15</span></div>
 </div>
 
 <div class="page">
@@ -366,7 +380,7 @@
     <tr><td>인식 모델</td><td>whisper-small 파인튜닝 (244M)</td><td>AI Hub 구음장애 데이터 학습. 온디바이스 이식이 가능한 크기(로드맵)</td></tr>
     <tr><td>보조 AI</td><td>Azure Speech, Gemini</td><td>다중 후보 생성 / 저신뢰 복원·대화 상대역. 교체 가능한 구조(공급자 추상화)</td></tr>
   </table>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>6 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>8 / 15</span></div>
 </div>
 
 <div class="page">
@@ -453,7 +467,7 @@
   </svg>
   </div>
   <p style="font-size:9pt; color:#43474D;">연습·대화 탭의 플로우는 다음과 같다. 연습(상황·읽기)은 문장당 3회 읽기 → 문장별 인식 검증 → 통과 시 사용자의 명시적 등록으로 이어진다(등록 당일은 게이트 경유, 다음 날부터 즉시 재생). AI 대화 연습은 말하기 → 전사 → AI 상대역의 음성 응답이 반복되는 구조이며, 실사용 경로와 분리되어 있다.</p>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>7 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>9 / 15</span></div>
 </div>
 
 <div class="page">
@@ -486,7 +500,7 @@
     <li><b>QA-06 엔진 교체 용이성</b>: ASR·LLM 공급자를 환경 변수로 전환(mock/로컬/클라우드) — 특정 업체 종속 없음.</li>
     <li><b>QA-07 오출력 상한</b>: 즉시 발화·강등·취소가 전건 기록되며 사용자가 직접 열람·검증 가능.</li>
   </ul>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>8 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>10 / 15</span></div>
 </div>
 
 <div class="page">
@@ -513,7 +527,7 @@
     ⑶ 실패해도 대화는 계속 ⑷ 한 화면 한 작업. 서체는 한국장애인개발원의 유니버설 디자인 서체(KoddiUD 온고딕)이며,
     주 터치 타깃은 64pt 이상이다.
   </div>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>9 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>11 / 15</span></div>
 </div>
 
 <div class="page">
@@ -542,7 +556,7 @@
       </div>
     </div>
   </div>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>10 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>12 / 15</span></div>
 </div>
 
 <div class="page">
@@ -571,7 +585,7 @@
   <div class="note">이 과정 자체가 본 과제의 기여 중 하나다. AI Hub 구음장애 데이터는 발화 단위 타임스탬프가 없어
   그대로는 최신 음성인식 모델 학습에 쓸 수 없다. 위 정제 파이프라인(VAD 분할 → DP 정렬 → 파일 단위 검증)은
   이 공공 데이터를 실제 서비스 학습에 쓸 수 있게 만드는 재사용 가능한 방법이며, 스크립트로 공개되어 있다.</div>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>11 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>13 / 15</span></div>
 </div>
 
 <div class="page">
@@ -579,7 +593,8 @@
   <h3>5.1 평가 설계</h3>
   <p>평가는 학습에 사용하지 않은(held-out) 화자로만 수행했다. 주 평가셋은 AI Hub Training 원천의 화자 9명,
   문장형 400클립이며 파일 단위 정렬 검증을 통과한 클립만 포함한다. 일반화 확인용 보조 평가셋은 Validation
-  원천의 단일 원인 유형 4종(유형당 150클립, 학습 화자 제외)이다. 지표는 글자 오류율(CER)과 단어 오류율(WER)을
+  원천의 단일 원인 유형 4종(유형당 150클립, 학습 화자 제외)이다.</p>
+  <p>지표는 글자 오류율(CER)과 단어 오류율(WER)을
   썼다. 4.4절의 학습 파이프라인을 포함해 전 과정이 재현 가능한 스크립트로 공개되어 있다.</p>
   <h3>5.2 결과 (검증 전 내부 실측값)</h3>
   <table>
@@ -604,7 +619,7 @@
     <li><b>지연시간</b>: 개발 장비(Apple Silicon 노트북) 기준 로컬 모델이 5초 오디오를 약 2초에 처리했다. 발화 종료 후 후보 표시 3초는 검증 전 내부 공학 목표다. 앙상블의 두 엔진은 동시 호출하므로 지연이 합산되지 않는다.</li>
     <li><b>과적합 관리</b>: 에폭별 평가로 낯선 화자 성능이 꺾이는 지점을 찾아 3에폭 체크포인트를 채택했다(4.4절 참조).</li>
   </ul>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>12 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>14 / 15</span></div>
 </div>
 
 <div class="page">
@@ -619,7 +634,8 @@
   </ul>
   <h2>6. 결론 및 향후 과제</h2>
   <p>본 과제는 구음장애인 의사소통 보조를 "인식률 문제"가 아니라 "오인식 통제 문제"로 재정의했다. 그 정의에 따라 확정 게이트를
-  중심에 둔 서비스를 설계하고, 파인튜닝 인식 모델(글자 오류율 42.9%→18.7%)과 함께 실기기에서 동작하는 수준까지 구현했다. 국가가 구축한 공공 데이터(AI Hub)를 당사자
+  중심에 둔 서비스를 설계하고, 파인튜닝 인식 모델(글자 오류율 42.9%→18.7%)과 함께 실기기에서 동작하는 수준까지 구현했다.</p>
+  <p>국가가 구축한 공공 데이터(AI Hub)를 당사자
   서비스로 전환하는 첫 사례를 목표로 한 결과물이다. 실기기 시연은 심사 인터뷰에서 직접 보일 수 있고, 전체 코드는 github.com/Jeonsubb/oneum 에
   공개되어 있다.</p>
   <p><b>향후 과제</b>: ① 구음장애 당사자 10명 이하 사용자 테스트(응답 방식 선택권·쉬운 동의서·중도 철회 절차 포함)
@@ -638,7 +654,7 @@
     <li>Google Project Relate 공지 — 한국어 미지원, 신규 등록 중단. / Voiceitt — 영어 전용 상용 서비스.</li>
     <li>자체 실측 전체 기록 — github.com/Jeonsubb/oneum 의 asr-poc/results/ (재현 스크립트 포함).</li>
   </ul>
-  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>13 / 13</span></div>
+  <div class="footer"><span>온음(Oneum) 최종 보고서</span><span>15 / 15</span></div>
 </div>
 </body>
 </html>
