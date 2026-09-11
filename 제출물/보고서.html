@@ -387,84 +387,85 @@
 <div class="page">
   <h2 style="margin-top:0;">3.4 사용자 플로우: 모든 길이 확정 게이트를 지난다</h2>
   <div class="diagram">
-  <svg viewBox="0 0 760 560" xmlns="http://www.w3.org/2000/svg" font-family="NanumRound, sans-serif">
+  <svg viewBox="0 0 760 526" xmlns="http://www.w3.org/2000/svg" font-family="NanumRound, sans-serif">
     <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10z" fill="#1D4ED8"/></marker></defs>
-    <!-- 상단 흐름 -->
-    <rect x="20" y="16" width="150" height="52" rx="10" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
-    <text x="95" y="38" text-anchor="middle" font-size="12" font-weight="800">① 홈</text>
-    <text x="95" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">상황 선택 → 눌러서 말하기</text>
-    <rect x="210" y="16" width="150" height="52" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
-    <text x="285" y="38" text-anchor="middle" font-size="12" font-weight="800">② 듣는 중</text>
-    <text x="285" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">목소리 반응 파동 · 재탭으로 종료</text>
-    <rect x="400" y="16" width="160" height="52" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
-    <text x="480" y="38" text-anchor="middle" font-size="12" font-weight="800">앙상블 인식 + 재정렬</text>
-    <text x="480" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">파인튜닝+범용 동시 · 개인 표현 대조</text>
-    <rect x="600" y="16" width="150" height="52" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
-    <text x="675" y="38" text-anchor="middle" font-size="12" font-weight="800">빠른 발화 판정</text>
-    <text x="675" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">6조건 전부 충족?</text>
-    <line x1="170" y1="42" x2="206" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <line x1="360" y1="42" x2="396" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <line x1="560" y1="42" x2="596" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <!-- 빠른 발화 경로 (오른쪽 아래) -->
-    <line x1="675" y1="68" x2="675" y2="102" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <text x="700" y="90" font-size="9" fill="#1D4ED8" font-weight="800">충족</text>
-    <rect x="600" y="106" width="150" height="46" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
-    <text x="675" y="126" text-anchor="middle" font-size="11" font-weight="800">0.5초 미리보기</text>
-    <text x="675" y="142" text-anchor="middle" font-size="9.5" fill="#43474D">이 안에 취소 가능</text>
-    <line x1="675" y1="152" x2="675" y2="186" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <rect x="600" y="190" width="150" height="46" rx="10" fill="#2563EB"/>
-    <text x="675" y="210" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">즉시 재생</text>
-    <text x="675" y="226" text-anchor="middle" font-size="9.5" fill="#DCE7FF">재생 후 3초 취소권 · 취소 시 잠금</text>
-    <!-- 판정 미충족 → 게이트 분기 -->
-    <line x1="600" y1="55" x2="480" y2="96" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <text x="548" y="86" font-size="9" fill="#43474D" font-weight="800">미충족 (표시 없이 게이트로)</text>
-    <rect x="390" y="100" width="180" height="44" rx="10" fill="#FAEEDC" stroke="#B98A3A" stroke-width="2"/>
-    <text x="480" y="119" text-anchor="middle" font-size="11.5" font-weight="800">재정렬 점수 분기</text>
-    <text x="480" y="136" text-anchor="middle" font-size="9.5" fill="#43474D">확신 / 불확실 / 실패</text>
-    <!-- 3분기 -->
-    <line x1="420" y1="144" x2="150" y2="196" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <text x="268" y="168" font-size="9" fill="#43474D" font-weight="800">확신 (점수 ≥ 0.75)</text>
-    <line x1="480" y1="144" x2="480" y2="196" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <text x="522" y="172" font-size="9" fill="#43474D" font-weight="800">불확실 (0.35~0.75)</text>
-    <line x1="510" y1="144" x2="640" y2="300" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <text x="530" y="262" font-size="9" fill="#43474D" font-weight="800">저신뢰 (&lt; 0.35)</text>
-    <!-- 확인 A -->
-    <rect x="40" y="200" width="220" height="64" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
-    <text x="150" y="222" text-anchor="middle" font-size="12" font-weight="800">③ 확인 A — "이 말이 맞나요?"</text>
-    <text x="150" y="240" text-anchor="middle" font-size="9.5" fill="#43474D">확신해도 재생하지 않고 먼저 묻는다</text>
-    <text x="150" y="256" text-anchor="middle" font-size="9.5" fill="#43474D">맞아요 / 다른 후보 보기</text>
-    <!-- 확인 B -->
-    <rect x="370" y="200" width="220" height="64" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
-    <text x="480" y="222" text-anchor="middle" font-size="12" font-weight="800">④ 확인 B — 후보 2~3개 선택</text>
-    <text x="480" y="240" text-anchor="middle" font-size="9.5" fill="#43474D">저신뢰 시 LLM 복원 후보 "제안" 합류</text>
-    <text x="480" y="256" text-anchor="middle" font-size="9.5" fill="#43474D">고치기 / 이 중에 없어요</text>
-    <!-- 실패 -->
-    <rect x="530" y="304" width="220" height="64" rx="10" fill="#FBECEA" stroke="#D70015" stroke-width="2"/>
-    <text x="640" y="326" text-anchor="middle" font-size="12" font-weight="800">⑦ 실패 — 대화는 계속</text>
-    <text x="640" y="344" text-anchor="middle" font-size="9.5" fill="#43474D">다시 말하기 / 직접 입력</text>
-    <text x="640" y="360" text-anchor="middle" font-size="9.5" fill="#43474D">2회 실패 시 직접 입력을 앞세움</text>
-    <!-- 수정 -->
-    <rect x="370" y="304" width="130" height="46" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
-    <text x="435" y="323" text-anchor="middle" font-size="11" font-weight="800">⑤ 문장 고치기</text>
-    <text x="435" y="340" text-anchor="middle" font-size="9.5" fill="#43474D">필요한 만큼만 수정</text>
-    <line x1="480" y1="264" x2="450" y2="300" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
+
+    <!-- 1행: 말하기 → 인식 -->
+    <rect x="10" y="14" width="168" height="56" rx="10" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
+    <text x="94" y="38" text-anchor="middle" font-size="12.5" font-weight="800">① 홈</text>
+    <text x="94" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">상황 선택 → 눌러서 말하기</text>
+    <rect x="202" y="14" width="168" height="56" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="286" y="38" text-anchor="middle" font-size="12.5" font-weight="800">② 듣는 중</text>
+    <text x="286" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">파동 표시 · 다시 눌러 종료</text>
+    <rect x="394" y="14" width="168" height="56" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
+    <text x="478" y="38" text-anchor="middle" font-size="12.5" font-weight="800">인식 + 개인화 재정렬</text>
+    <text x="478" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">두 엔진 동시 · 내 표현 대조</text>
+    <rect x="586" y="14" width="164" height="56" rx="10" fill="#fff" stroke="#C3C6CC" stroke-width="2"/>
+    <text x="668" y="38" text-anchor="middle" font-size="12.5" font-weight="800">빠른 발화 판정</text>
+    <text x="668" y="56" text-anchor="middle" font-size="9.5" fill="#43474D">6가지 안전 조건 검사</text>
+    <line x1="178" y1="42" x2="198" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="370" y1="42" x2="390" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="562" y1="42" x2="582" y2="42" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+
+    <!-- 충족: 오른쪽 열 수직 -->
+    <line x1="668" y1="70" x2="668" y2="98" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="680" y="92" font-size="9.5" fill="#1D4ED8" font-weight="800">모두 충족</text>
+    <rect x="586" y="102" width="164" height="50" rx="10" fill="#E3EBFF" stroke="#2563EB" stroke-width="2"/>
+    <text x="668" y="123" text-anchor="middle" font-size="11.5" font-weight="800">0.5초 미리보기</text>
+    <text x="668" y="140" text-anchor="middle" font-size="9.5" fill="#43474D">이 안에 취소 가능</text>
+    <line x1="668" y1="152" x2="668" y2="172" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <rect x="586" y="176" width="164" height="50" rx="10" fill="#2563EB"/>
+    <text x="668" y="197" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">즉시 재생</text>
+    <text x="668" y="214" text-anchor="middle" font-size="9.5" fill="#DCE7FF">재생 후 3초 취소 · 취소 시 잠금</text>
+
+    <!-- 미충족: 직교로 분기 박스 -->
+    <polyline points="620,70 620,90 306,90 306,116" fill="none" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="425" y="84" font-size="9.5" fill="#43474D" font-weight="800">미충족 (표시 없이 확인 절차로)</text>
+    <rect x="222" y="120" width="168" height="50" rx="10" fill="#FAEEDC" stroke="#B98A3A" stroke-width="2"/>
+    <text x="306" y="141" text-anchor="middle" font-size="11.5" font-weight="800">인식 확신도 분기</text>
+    <text x="306" y="158" text-anchor="middle" font-size="9.5" fill="#43474D">확신 / 불확실 / 저신뢰</text>
+
+    <!-- 3갈래: 수직·수평 직교 -->
+    <line x1="306" y1="170" x2="306" y2="196" stroke="#1D4ED8" stroke-width="2.5"/>
+    <polyline points="130,196 542,196" fill="none" stroke="#1D4ED8" stroke-width="2.5"/>
+    <line x1="130" y1="196" x2="130" y2="228" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="336" y1="196" x2="336" y2="228" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="542" y1="196" x2="542" y2="228" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="138" y="216" font-size="9.5" fill="#43474D" font-weight="800">확신</text>
+    <text x="344" y="216" font-size="9.5" fill="#43474D" font-weight="800">불확실</text>
+    <text x="550" y="216" font-size="9.5" fill="#43474D" font-weight="800">저신뢰</text>
+
+    <!-- 3열 확인 화면 -->
+    <rect x="24" y="232" width="212" height="74" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+    <text x="130" y="256" text-anchor="middle" font-size="12" font-weight="800">③ 확인 A</text>
+    <text x="130" y="274" text-anchor="middle" font-size="9.5" fill="#43474D">"이 말이 맞나요?" — 재생 전에 먼저 묻기</text>
+    <text x="130" y="290" text-anchor="middle" font-size="9.5" fill="#43474D">맞아요 / 다른 후보 보기</text>
+    <rect x="230" y="232" width="212" height="74" rx="10" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+    <text x="336" y="256" text-anchor="middle" font-size="12" font-weight="800">④ 확인 B</text>
+    <text x="336" y="274" text-anchor="middle" font-size="9.5" fill="#43474D">후보 2~3개 + AI "제안" 표식</text>
+    <text x="336" y="290" text-anchor="middle" font-size="9.5" fill="#43474D">고르기 / 고치기 / 이 중에 없어요</text>
+    <rect x="436" y="232" width="212" height="74" rx="10" fill="#FBECEA" stroke="#D70015" stroke-width="2"/>
+    <text x="542" y="256" text-anchor="middle" font-size="12" font-weight="800">⑤ 실패 — 대화는 계속</text>
+    <text x="542" y="274" text-anchor="middle" font-size="9.5" fill="#43474D">다시 말하기 / 직접 입력</text>
+    <text x="542" y="290" text-anchor="middle" font-size="9.5" fill="#43474D">2회 실패 시 직접 입력을 먼저 권함</text>
+
+    <!-- 게이트로 수직 합류 -->
+    <line x1="130" y1="306" x2="130" y2="342" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="336" y1="306" x2="336" y2="342" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <line x1="542" y1="306" x2="542" y2="342" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+    <text x="554" y="328" font-size="9" fill="#43474D" font-weight="800">직접 입력 후 확정</text>
+
     <!-- 확정 게이트 -->
-    <rect x="110" y="400" width="380" height="52" rx="12" fill="#2563EB"/>
-    <text x="300" y="422" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fff">확정 게이트 — 사용자가 고른 문장만 통과</text>
-    <text x="300" y="440" text-anchor="middle" font-size="10" fill="#DCE7FF">게이트를 지나지 않은 문장은 어떤 경우에도 소리 나지 않는다 (QA-01)</text>
-    <line x1="150" y1="264" x2="240" y2="396" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <line x1="450" y1="264" x2="340" y2="396" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <line x1="435" y1="350" x2="370" y2="398" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
-    <line x1="620" y1="368" x2="480" y2="410" stroke="#1D4ED8" stroke-width="2" marker-end="url(#ar3)"/>
-    <text x="565" y="398" font-size="9" fill="#43474D" font-weight="800">직접 입력 후 확정</text>
+    <rect x="24" y="346" width="624" height="56" rx="12" fill="#2563EB"/>
+    <text x="336" y="370" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fff">확정 게이트 — 사용자가 고른 문장만 통과</text>
+    <text x="336" y="390" text-anchor="middle" font-size="10" fill="#DCE7FF">게이트를 지나지 않은 문장은 어떤 경우에도 소리 나지 않습니다</text>
+    <line x1="336" y1="402" x2="336" y2="438" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
+
     <!-- 전달 -->
-    <rect x="110" y="482" width="380" height="56" rx="12" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
-    <text x="300" y="504" text-anchor="middle" font-size="12.5" font-weight="800">⑥ 전달 — 큰 글자 + 명료한 음성(TTS) + 대면 모드</text>
-    <text x="300" y="522" text-anchor="middle" font-size="10" fill="#43474D">확정 결과는 교정 이력으로 축적 → 다음 재정렬에 반영 (쓸수록 맞춰짐)</text>
-    <line x1="300" y1="452" x2="300" y2="478" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ar3)"/>
-    <path d="M 110 512 C 30 512 20 320 20 200 C 20 120 30 90 90 72" fill="none" stroke="#8A8ACC" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ar3)"/>
-    <text x="36" y="330" font-size="9" fill="#6D6D72" font-weight="800" transform="rotate(-90 36 330)">교정 이력 학습 루프 (SF-07)</text>
+    <rect x="24" y="442" width="624" height="56" rx="12" fill="#F4F6FE" stroke="#2563EB" stroke-width="2"/>
+    <text x="336" y="466" text-anchor="middle" font-size="12.5" font-weight="800">⑥ 전달 — 큰 글자 + 명료한 음성 + 대면 모드</text>
+    <text x="336" y="486" text-anchor="middle" font-size="10" fill="#43474D">확정 결과는 교정 기록으로 쌓여 다음 후보 정렬에 반영됩니다 (쓸수록 맞춰짐)</text>
   </svg>
   </div>
   <p style="font-size:9pt; color:#43474D;">연습·대화 탭의 플로우는 다음과 같습니다. 연습(상황·읽기)은 문장당 3회 읽기 → 문장별 인식 검증 → 통과 시 사용자의 명시적 등록으로 이어집니다(등록 당일은 게이트 경유, 다음 날부터 즉시 재생). AI 대화 연습은 말하기 → 전사 → AI 상대역의 음성 응답이 반복되는 구조이며, 실사용 경로와 분리되어 있습니다.</p>
