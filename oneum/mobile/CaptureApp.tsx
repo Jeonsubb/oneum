@@ -139,7 +139,8 @@ export default function CaptureApp() {
   const { node, tab } = shotContent(shot)
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={layout.screen} edges={['top', 'left', 'right']}>
+      {/* 문서 수록용 캡처는 흰 배경으로 — 회색 그룹 배경이 인쇄물에서 회색 판처럼 보인다 */}
+      <SafeAreaView style={[layout.screen, { backgroundColor: '#fff' }]} edges={['top', 'left', 'right']}>
         <View style={{ flex: 1, paddingBottom: tab ? TABBAR_CONTENT_HEIGHT : 0 }}>{node}</View>
         {tab && <TabBar active={tab} onSelect={noop} />}
       </SafeAreaView>

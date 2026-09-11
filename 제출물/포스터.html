@@ -34,13 +34,13 @@
   .hero .sub { font-size: 20px; font-weight: 700; opacity: .88; margin-top: 20px; line-height: 1.7; }
 
   .hero-phones { position: relative; margin-top: 60px; height: 560px; }
-  .hp { position: absolute; background: #0b0b0d; border-radius: 38px; padding: 9px;
-    box-shadow: 0 30px 60px rgba(3,20,60,.45); }
-  .hp img { display: block; border-radius: 30px; }
-  .hp.center { left: 50%; transform: translateX(-50%); width: 300px; z-index: 3; }
+  .hp { position: absolute; border-radius: 30px; overflow: hidden;
+    box-shadow: 0 30px 60px rgba(3,20,60,.40); }
+  .hp img { display: block; }
+  .hp.center { left: 50%; transform: translateX(-50%); width: 282px; z-index: 3; }
   .hp.center img { width: 282px; }
-  .hp.left  { left: 205px; top: 84px; width: 250px; transform: rotate(-5deg); opacity: .94; z-index: 2; }
-  .hp.right { right: 205px; top: 84px; width: 250px; transform: rotate(5deg); opacity: .94; z-index: 2; }
+  .hp.left  { left: 214px; top: 84px; width: 232px; transform: rotate(-5deg); opacity: .94; z-index: 2; }
+  .hp.right { right: 214px; top: 84px; width: 232px; transform: rotate(5deg); opacity: .94; z-index: 2; }
   .hp.left img, .hp.right img { width: 232px; }
   .hero-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 210px; z-index: 4;
     background: linear-gradient(transparent, #fff); }
@@ -57,9 +57,9 @@
   /* ─── 3단계 ─── */
   .steps { display: flex; gap: 34px; padding: 48px 90px 10px; }
   .step { flex: 1; text-align: center; }
-  .step .ph { background: #0b0b0d; border-radius: 32px; padding: 8px; display: inline-block;
-    box-shadow: 0 16px 36px rgba(20,40,90,.16); }
-  .step .ph img { width: 235px; display: block; border-radius: 25px; }
+  .step .ph { border-radius: 26px; overflow: hidden; display: inline-block; border: 1.5px solid #E1E5EC;
+    box-shadow: 0 16px 36px rgba(20,40,90,.14); }
+  .step .ph img { width: 235px; display: block; }
   .step .no { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px;
     border-radius: 999px; background: #0A6CFF; color: #fff; font-size: 17px; font-weight: 800; margin-top: 26px; }
   .step h3 { font-size: 22px; font-weight: 800; margin-top: 12px; }
@@ -68,8 +68,8 @@
   /* ─── 기능 카드 2열 ─── */
   .feats { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; padding: 50px 90px 0; }
   .feat { display: flex; gap: 22px; align-items: center; background: #F4F6FA; border-radius: 26px; padding: 26px; }
-  .feat .ph { background: #0b0b0d; border-radius: 22px; padding: 6px; flex-shrink: 0; }
-  .feat .ph img { width: 150px; display: block; border-radius: 17px; }
+  .feat .ph { border-radius: 18px; overflow: hidden; flex-shrink: 0; border: 1.5px solid #E1E5EC; background: #fff; }
+  .feat .ph img { width: 150px; display: block; }
   .feat h3 { font-size: 21px; font-weight: 800; line-height: 1.35; }
   .feat h3 em { font-style: normal; color: #0A5BE0; }
   .feat p { font-size: 14px; font-weight: 700; color: #6C7076; line-height: 1.65; margin-top: 9px; }
